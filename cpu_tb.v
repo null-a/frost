@@ -15,6 +15,9 @@ module cpu_tb;
    initial begin
       $dumpfile("cpu.vcd");
       $dumpvars(0, cpu_tb);
+      $dumpvars(1, dut.reg_file.file1[0]);
+      $dumpvars(1, dut.reg_file.file1[1]);
+      $dumpvars(1, dut.reg_file.file1[2]);
       #300 $finish;
    end
 
