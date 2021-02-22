@@ -11,11 +11,16 @@ module ram(input clk,
       dout = 0;
    end
 
+   // 0:	00200013          	li	x0,2
+   // 4:	00300093          	li	x1,3
+   // 8:	00008133          	add	x2,x1,x0
+   // c:	00100073          	ebreak
+
    initial begin
-      ram[0] = 32'hff0000aa;
-      ram[1] = 32'hff0000bb;
-      ram[2] = 32'hff0000cc;
-      ram[3] = 32'hff0000dd;
+      ram[0] = 32'h00200013;
+      ram[1] = 32'h00300093;
+      ram[2] = 32'h00008133;
+      ram[3] = 32'h00100073;
    end
 
    reg [31:0] ram [1024-1:0];
