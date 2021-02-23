@@ -7,7 +7,7 @@ module decode(input [31:0] inst,
               output [4:0] rs2,
               output [2:0] funct3,
               output [6:0] funct7,
-              output [11:0] imm);
+              output [31:0] imm);
 
    assign opcode = inst[6:0];
    assign rd = inst[11:7];
@@ -16,6 +16,6 @@ module decode(input [31:0] inst,
    assign rs2 = inst[24:20];
    assign funct7 = inst[31:25];
 
-   assign imm = inst[31:20];
+   assign imm = {20'b0, inst[31:20]};
 
 endmodule // decode
