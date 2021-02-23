@@ -17,13 +17,16 @@ module ram(input clk,
    // c:	00100073          	ebreak
 
    initial begin
-      ram[0] = 32'h00200093;
-      ram[1] = 32'h00300113;
-      ram[2] = 32'h001101b3;
-      ram[3] = 32'h00100073;
+      // ram[0] = 32'h00200093;
+      // ram[1] = 32'h00300113;
+      // ram[2] = 32'h001101b3;
+      // ram[3] = 32'h00100073;
+      $readmemh("tmp.hex", ram);
    end
 
-   reg [31:0] ram [1024-1:0];
+   // Left word is address 0 to avoid this warning:
+   // https://github.com/steveicarus/iverilog/issues/343
+   reg [31:0] ram [0:1024-1];
 
    always @(posedge clk) begin
       if (re) begin
