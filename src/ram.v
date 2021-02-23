@@ -21,7 +21,7 @@ module ram(input clk,
       // ram[1] = 32'h00300113;
       // ram[2] = 32'h001101b3;
       // ram[3] = 32'h00100073;
-      $readmemh("tmp.hex", ram);
+      $readmemh(`ifdef SIM "ram.hex" `else "tmp.hex" `endif, ram);
    end
 
    // Left word is address 0 to avoid this warning:
