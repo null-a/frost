@@ -10,6 +10,12 @@ module cpu_tb;
       #10 clk = (clk === 1'b0);
    end
 
+   time cycle = 0;
+
+   always @(posedge clk) begin
+      cycle = cycle + 1;
+   end
+
    cpu dut (.clk(clk));
 
    initial begin
@@ -19,7 +25,10 @@ module cpu_tb;
       $dumpvars(1, dut.reg_file.file1[1]);
       $dumpvars(1, dut.reg_file.file1[2]);
       $dumpvars(1, dut.reg_file.file1[3]);
-      #300 $finish;
+
+      wait (dut.halt == 1 || cycle == 1000) #20;
+      $display("cycle=%d, halt=%d, pc=%d, x3=%d", cycle, dut.halt, dut.pc, dut.reg_file.file1[3]);
+      $finish;
    end
 
 endmodule // cpu_tb

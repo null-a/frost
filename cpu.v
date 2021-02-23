@@ -3,6 +3,7 @@
 module cpu(input clk);
 
    wire [1:0] step;
+   wire halt;
    wire pc_enable;
    wire [31:0] pc;
    wire [31:0] inst;
@@ -24,7 +25,7 @@ module cpu(input clk);
    wire alu_sel1;
    wire alu_sel2;
 
-   control control(.clk(clk), .opcode(opcode), .step(step), .pc_enable(pc_enable),
+   control control(.clk(clk), .opcode(opcode), .step(step), .halt(halt), .pc_enable(pc_enable),
                    .reg_re1(reg_re1), .reg_re2(reg_re2), .reg_we(reg_we),
                    .alu_sel1(alu_sel1), .alu_sel2(alu_sel2));
 
