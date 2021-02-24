@@ -30,7 +30,7 @@ module cpu_tb;
       $dumpvars(1, dut.reg_file.file1[31]);
       `endif
 
-      wait (dut.halt == 1 || cycle == 1000) #20;
+      wait (dut.halt == 1 || cycle == 10_000) #20;
       $display("cycle=%d, halt=%d, pc=%d, x28=%d, result=%s",
                cycle, dut.halt, dut.pc,
                dut.reg_file.file1[28],
