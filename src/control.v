@@ -19,6 +19,7 @@ module control(input clk,
    localparam OP     = 7'b0110011;
    localparam SYSTEM = 7'b1110011;
    localparam BRANCH = 7'b1100011;
+   localparam LUI    = 7'b0110111;
 
    initial begin
       step = 0;
@@ -38,10 +39,10 @@ module control(input clk,
 
    assign reg_re1 = step == 1;
    assign reg_re2 = step == 1;
-   assign reg_we = step == 3 && (opcode == OP_IMM || opcode == OP);
+   assign reg_we = step == 3 && (opcode == OP_IMM || opcode == OP || opcode == LUI);
 
    assign alu_sel1 = step == 1;
-   assign alu_sel2 = step == 1 || opcode == OP_IMM;
+   assign alu_sel2 = step == 1 || opcode == OP_IMM || opcode == LUI;
    assign alu_op = step == 3 && opcode == BRANCH ? 3'b1 : 3'b0;
 
    assign target_load = (step == 1);
