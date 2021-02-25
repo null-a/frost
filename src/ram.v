@@ -32,6 +32,9 @@ module ram(input clk,
       if (re) begin
          dout <= ram[addr[10:0]];
       end
+      if (we) begin
+         ram[addr[10:0]] <= din;
+      end
    end
 
 endmodule // ram

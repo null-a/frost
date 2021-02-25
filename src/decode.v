@@ -40,7 +40,8 @@ module decode(input [31:0] inst,
 
    always @(*) begin
       case (opcode)
-        // 7'b0100011: // S
+        7'b0100011: // S
+          imm = {{21{signbit}}, inst[30:25], inst[11:7]};
         7'b1101111: // J
           imm = {{12{signbit}}, inst[19:12], inst[20], inst[30:21], 1'b0};
         7'b0110111, // U
