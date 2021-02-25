@@ -9,9 +9,12 @@ module alu(input [31:0] a,
       casez (op)
         {1'b0, 1'b0, 3'd0}: dout = a + b;
         {1'b0, 1'b1, 3'd0}: dout = a - b;
-        // TODO: shift left
+        {1'b0, 1'b?, 3'd1}: dout = a << b[4:0];
         {1'b0, 1'b?, 3'd4}: dout = a ^ b;
-        // TODO: shift right (l/a)
+
+        {1'b0, 1'b0, 3'd5}: dout = a >> b[4:0];
+        {1'b0, 1'b1, 3'd5}: dout = $signed(a) >>> b[4:0];
+
         {1'b0, 1'b?, 3'd6}: dout = a | b;
         {1'b0, 1'b?, 3'd7}: dout = a & b;
 
