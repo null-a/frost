@@ -28,7 +28,7 @@ module decode(input [31:0] inst,
    assign opcode = inst[6:0];
    assign rd = inst[11:7];
    assign funct3 = inst[14:12];
-   assign rs1 = opcode == LUI ? 5'b0 : inst[19:15]; // LUI
+   assign rs1 = opcode == LUI ? 5'b0 : inst[19:15];
    assign rs2 = inst[24:20];
    assign funct7 = inst[31:25];
 
@@ -40,17 +40,17 @@ module decode(input [31:0] inst,
 
    always @(*) begin
       case (opcode)
-        7'b0100011: // S
+        STORE:   // S
           imm = {{21{signbit}}, inst[30:25], inst[11:7]};
-        7'b1101111: // J
+        JAL:     // J
           imm = {{12{signbit}}, inst[19:12], inst[20], inst[30:21], 1'b0};
-        7'b0110111, // U
-        7'b0010111:
+        LUI,     // U
+        AUIPC:
           imm = {inst[31:12], 12'b0};
-        7'b1100011: // B
+        BRANCH:  // B
           imm = {{20{signbit}}, inst[7], inst[30:25], inst[11:8], 1'b0};
-        default:    // I
-          imm = {{20{signbit}}, inst[31:20]};
+        default: // I
+          imm = {{21{signbit}}, inst[30:20]};
 
       endcase
    end
