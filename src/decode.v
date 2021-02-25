@@ -7,7 +7,8 @@ module decode(input [31:0] inst,
               output [4:0] rs2,
               output [2:0] funct3,
               output [6:0] funct7,
-              output reg [31:0] imm);
+              output reg [31:0] imm,
+              output bit30);
 
    assign opcode = inst[6:0];
    assign rd = inst[11:7];
@@ -15,6 +16,8 @@ module decode(input [31:0] inst,
    assign rs1 = opcode == 7'b0110111 ? 5'b0 : inst[19:15]; // LUI
    assign rs2 = inst[24:20];
    assign funct7 = inst[31:25];
+
+   assign bit30 = inst[30];
 
    wire signbit;
    assign signbit = inst[31];

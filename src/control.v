@@ -2,6 +2,8 @@
 
 module control(input clk,
                input [6:0] opcode,
+               input [2:0] funct3,
+               input bit30,
                input cmp_out,
                output reg [1:0] step,
                output halt,
@@ -10,9 +12,9 @@ module control(input clk,
                output reg_re1,
                output reg_re2,
                output reg_we,
-               output alu_sel1,
-               output alu_sel2,
-               output [2:0] alu_op,
+               output reg alu_sel1,
+               output reg alu_sel2,
+               output reg [4:0] alu_op,
                output target_load);
 
    localparam OP_IMM = 7'b0010011;
@@ -41,10 +43,33 @@ module control(input clk,
    assign reg_re2 = step == 1;
    assign reg_we = step == 3 && (opcode == OP_IMM || opcode == OP || opcode == LUI);
 
-   assign alu_sel1 = step == 1;
-   assign alu_sel2 = step == 1 || opcode == OP_IMM || opcode == LUI;
-   assign alu_op = step == 3 && opcode == BRANCH ? 3'b1 : 3'b0;
-
    assign target_load = (step == 1);
+
+   always @(*) begin
+      casez ({step, opcode})
+        {2'b01, 7'b?}:
+          begin
+             alu_sel1 = 1; alu_sel2 = 1;
+          end
+        {2'b11, OP_IMM},
+        {2'b11, LUI}:
+          begin
+             alu_sel1 = 0; alu_sel2 = 1;
+          end
+        default:
+          begin
+             alu_sel1 = 0; alu_sel2 = 0;
+          end
+      endcase // casez ({step, opcode})
+   end
+
+   always @(*) begin
+      casez ({step, opcode, funct3})
+        {2'b11, OP,     3'b?}: alu_op = {1'b0, bit30, funct3};
+        {2'b11, OP_IMM, 3'b?}: alu_op = {1'b0, 1'b0,  funct3};
+        {2'b11, BRANCH, 3'b?}: alu_op = {1'b1, 1'b0,  funct3};
+        default:               alu_op = {1'b0, 1'b0,  3'b0};
+      endcase // casez ({step, opcode, funct3})
+   end
 
 endmodule // control

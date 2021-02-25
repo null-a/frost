@@ -15,6 +15,7 @@ module cpu(input clk);
    wire [2:0] funct3;
    wire [6:0] funct7;
    wire [31:0] imm;
+   wire bit30;
    wire reg_re1;
    wire reg_re2;
    wire reg_we;
@@ -25,11 +26,11 @@ module cpu(input clk);
    wire [31:0] alu_out;
    wire alu_sel1;
    wire alu_sel2;
-   wire [2:0] alu_op;
+   wire [4:0] alu_op;
    wire target_load;
    wire [31:0] target;
 
-   control control(.clk(clk), .opcode(opcode), .cmp_out(alu_out[0]),
+   control control(.clk(clk), .opcode(opcode), .funct3(funct3), .bit30(bit30), .cmp_out(alu_out[0]),
                    .step(step), .halt(halt),
                    .pc_enable(pc_enable), .pc_load(pc_load),
                    .reg_re1(reg_re1), .reg_re2(reg_re2), .reg_we(reg_we),
@@ -49,7 +50,7 @@ module cpu(input clk);
    decode decode (.inst(inst), .opcode(opcode),
                   .rd(rd), .rs1(rs1), .rs2(rs2),
                   .funct3(funct3), .funct7(funct7),
-                  .imm(imm));
+                  .imm(imm), .bit30(bit30));
 
    mux alu_in1_mux (.a(r1), .b(pc), .sel(alu_sel1), .out(alu_in1));
    mux alu_in2_mux (.a(r2), .b(imm), .sel(alu_sel2), .out(alu_in2));
