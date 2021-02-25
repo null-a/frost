@@ -26,6 +26,7 @@ module cpu_tb;
       $dumpvars(1, dut.reg_file.file1[1]);
       $dumpvars(1, dut.reg_file.file1[2]);
       $dumpvars(1, dut.reg_file.file1[3]);
+      $dumpvars(1, dut.reg_file.file1[4]);
       $dumpvars(1, dut.reg_file.file1[28]);
       $dumpvars(1, dut.reg_file.file1[31]);
       `endif

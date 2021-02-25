@@ -1,9 +1,11 @@
 `default_nettype none
 
-module mux(input [31:0] a,
-           input [31:0] b,
-           input sel,
-           output [31:0] out);
+module mux
+  #(parameter WIDTH=32)
+   (input [WIDTH-1:0] a,
+    input [WIDTH-1:0] b,
+    input sel,
+    output [WIDTH-1:0] out);
 
    assign out = sel ? b : a;
 

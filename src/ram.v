@@ -26,11 +26,11 @@ module ram(input clk,
 
    // Left word is address 0 to avoid this warning:
    // https://github.com/steveicarus/iverilog/issues/343
-   reg [31:0] ram [0:1024-1];
+   reg [31:0] ram [0:2048-1];
 
    always @(posedge clk) begin
       if (re) begin
-         dout <= ram[addr[9:0]];
+         dout <= ram[addr[10:0]];
       end
    end
 

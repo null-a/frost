@@ -7,8 +7,30 @@ module alu(input [31:0] a,
 
    always @(*) begin
       casez (op)
-        {1'b1, 1'b?, 3'b001}: dout = {31'b0, a != b};
-        default:              dout = a + b;
+        {1'b0, 1'b0, 3'd0}: dout = a + b;
+        {1'b0, 1'b1, 3'd0}: dout = a - b;
+        // TODO: shift left
+        {1'b0, 1'b?, 3'd4}: dout = a ^ b;
+        // TODO: shift right (l/a)
+        {1'b0, 1'b?, 3'd6}: dout = a | b;
+        {1'b0, 1'b?, 3'd7}: dout = a & b;
+
+        {1'b0, 1'b?, 3'd2}: dout = {31'b0, $signed(a) < $signed(b)};
+        {1'b0, 1'b?, 3'd3}: dout = {31'b0, a < b};
+
+        {1'b1, 1'b?, 3'd0}: dout = {31'b0, a == b};
+        {1'b1, 1'b?, 3'd1}: dout = {31'b0, a != b};
+
+        {1'b1, 1'b?, 3'd4}: dout = {31'b0, $signed(a) < $signed(b)};
+        {1'b1, 1'b?, 3'd6}: dout = {31'b0, a < b};
+        {1'b1, 1'b?, 3'd5}: dout = {31'b0, $signed(a) >= $signed(b)};
+        {1'b1, 1'b?, 3'd7}: dout = {31'b0, a >= b};
+
+        default: begin
+           $display("error: unknown alu op");
+           dout = 32'b0;
+        end
+
       endcase // casez (op)
    end
 
