@@ -1,6 +1,7 @@
 `default_nettype none
 
 module cpu(input clk,
+           input reset,
            input [31:0] ram_rdata,
            output [31:0] ram_wdata,
            output [29:0] ram_addr,
@@ -45,7 +46,7 @@ module cpu(input clk,
 
    assign ram_wdata = r2;
 
-   control control(.clk(clk), .opcode(opcode), .funct3(funct3), .bit20(bit20), .bit30(bit30),
+   control control(.clk(clk), .reset(reset), .opcode(opcode), .funct3(funct3), .bit20(bit20), .bit30(bit30),
                    .cmp_out(alu_out[0]),
                    .step(step), .halt(halt),
                    .pc_enable(pc_enable), .pc_load(pc_load),
@@ -55,7 +56,7 @@ module cpu(input clk,
                    .ram_addr_sel(ram_addr_sel), .ram_re(ram_re), .ram_we(ram_we),
                    .inst_load(inst_load), .inst_mux_sel(inst_mux_sel));
 
-   program_counter program_counter (.clk(clk), .en(pc_enable), .load(pc_load),
+   program_counter program_counter (.clk(clk), .reset(reset), .en(pc_enable), .load(pc_load),
                                     .target(target), .pc(pc), .pc_plus_4(pc_plus_4));
 
    mux4 wd_mux (.a(alu_out), .b(pc_plus_4), .c(32'b0), .d(ram_rdata),

@@ -11,11 +11,20 @@ module reg_file(input clk,
                 output reg [31:0] dout1,
                 output reg [31:0] dout2);
 
+
+   // Specifying an initial value as below prevent yosys inferring a
+   // BRAM. This is a known issue:
+   //
+   // https://github.com/YosysHQ/yosys/issues/1088
+   //
+   // Defining the register internally and using an output wire
+   // (rather than reg) might be a workaround.
+
    integer i;
 
    initial begin
-      dout1 = 0;
-      dout2 = 0;
+      // dout1 = 0;
+      // dout2 = 0;
       for(i=0; i<32; i=i+1) begin
          file1[i] = 0;
          file2[i] = 0;

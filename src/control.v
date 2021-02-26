@@ -1,6 +1,7 @@
 `default_nettype none
 
 module control(input clk,
+               input reset,
                input [6:0] opcode,
                input [2:0] funct3,
                input bit20,
@@ -47,7 +48,12 @@ module control(input clk,
    assign next_step = step + 1;
 
    always @(posedge clk) begin
-      step <= next_step;
+      if (reset) begin
+         step <= 0;
+      end
+      else begin
+         step <= next_step;
+      end
    end
 
    assign halt = opcode == SYSTEM && bit20;

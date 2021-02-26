@@ -7,9 +7,21 @@ module ram(input clk,
            input we,
            output reg [31:0] dout);
 
-   initial begin
-      dout = 0;
-   end
+   // Specifying an initial value as below prevent yosys inferring a
+   // BRAM. This is a known issue:
+   //
+   // https://github.com/YosysHQ/yosys/issues/1088
+   //
+   // Defining the register internally and using an output wire
+   // (rather than reg) might be a workaround.
+
+   // initial begin
+   //    dout = 0;
+   // end
+
+   `ifndef ISA_TEST
+   initial $readmemh("firmware.hex", ram);
+   `endif
 
    // Left word is address 0 to avoid this warning:
    // https://github.com/steveicarus/iverilog/issues/343
