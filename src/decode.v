@@ -42,6 +42,7 @@ module decode(input [31:0] inst,
       case (opcode)
         STORE:   // S
           imm = {{21{signbit}}, inst[30:25], inst[11:7]};
+        // TODO: Droping this case doesn't cause a test failure.
         JAL:     // J
           imm = {{12{signbit}}, inst[19:12], inst[20], inst[30:21], 1'b0};
         LUI,     // U
