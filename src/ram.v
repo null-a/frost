@@ -12,7 +12,7 @@ module ram(input clk,
    end
 
    initial begin
-      $readmemh(`ifdef SIM "ram.hex" `else "tmp.hex" `endif, ram);
+      $readmemh(`ifdef ISA_TEST {"../tests/", `ISA_TEST, ".hex"} `else "ram.hex" `endif, ram);
    end
 
    // Left word is address 0 to avoid this warning:

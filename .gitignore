@@ -4,5 +4,6 @@ venv/
 *.asc
 *.bin
 *.json
+*.vvp
 *.vcd
 src/ram.hex

@@ -10,7 +10,7 @@ module cpu_tb;
       #10 clk = (clk === 1'b0);
    end
 
-   time cycle = 0;
+   integer cycle = 0;
 
    always @(posedge clk) begin
       cycle = cycle + 1;
@@ -32,7 +32,8 @@ module cpu_tb;
       `endif
 
       wait (dut.halt == 1 || cycle == 10_000) #20;
-      $display("cycle=%d, halt=%d, pc=%d, x28=%d, result=%s",
+      $display("test=%6s cycle=%d, halt=%d, pc=%d, x28=%d, result=%s",
+               `ifdef ISA_TEST `ISA_TEST `else "<ram.hex>" `endif,
                cycle, dut.halt, dut.pc,
                dut.reg_file.file1[28],
                dut.reg_file.file1[31] ==

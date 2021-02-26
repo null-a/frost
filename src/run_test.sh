@@ -1,6 +1,3 @@
 set -e
-echo $1
-cp ../tests/$1.hex ./tmp.hex
-iverilog -y . -o cpu_tb.vvp cpu_tb.v
+iverilog -y . -o cpu_tb.vvp -DISA_TEST=\"$1\" cpu_tb.v
 vvp -n cpu_tb.vvp
-rm tmp.hex cpu_tb.vvp
