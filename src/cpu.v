@@ -1,6 +1,11 @@
 `default_nettype none
 
-module cpu(input clk);
+module cpu(input clk,
+           input [31:0] ram_rdata,
+           output [31:0] ram_wdata,
+           output [29:0] ram_addr,
+           output ram_re,
+           output ram_we);
 
    wire [1:0] step;
    wire halt;
@@ -10,9 +15,7 @@ module cpu(input clk);
    wire [31:0] pc_plus_4;
    wire [31:0] inst;
    wire [31:0] inst_reg_out;
-   wire [31:0] ram_out;
    wire [31:0] wd;
-   wire [29:0] ram_addr;
    wire [6:0] opcode;
    wire [4:0] rd;
    wire [4:0] rs1;
@@ -38,9 +41,9 @@ module cpu(input clk);
    wire inst_load;
    wire inst_mux_sel;
    wire ram_addr_sel;
-   wire ram_re;
-   wire ram_we;
    wire [31:0] target;
+
+   assign ram_wdata = r2;
 
    control control(.clk(clk), .opcode(opcode), .funct3(funct3), .bit20(bit20), .bit30(bit30),
                    .cmp_out(alu_out[0]),
@@ -55,7 +58,7 @@ module cpu(input clk);
    program_counter program_counter (.clk(clk), .en(pc_enable), .load(pc_load),
                                     .target(target), .pc(pc), .pc_plus_4(pc_plus_4));
 
-   mux4 wd_mux (.a(alu_out), .b(pc_plus_4), .c(32'b0), .d(ram_out),
+   mux4 wd_mux (.a(alu_out), .b(pc_plus_4), .c(32'b0), .d(ram_rdata),
                 .sel(wd_sel), .out(wd));
 
    reg_file reg_file (.clk(clk), .ra1(rs1), .ra2(rs2), .wa(rd),
@@ -65,12 +68,9 @@ module cpu(input clk);
    mux #(.WIDTH(30)) ram_addr_mux (.a(pc[31:2]), .b(alu_out[31:2]), .out(ram_addr),
                                  .sel(ram_addr_sel));
 
-   ram ram (.clk(clk), .addr(ram_addr), .din(r2),
-            .re(ram_re), .we(ram_we), .dout(ram_out));
-
    // This combination might be abstracted as a transparent flip-flop?
-   register inst_reg (.clk(clk), .din(ram_out), .dout(inst_reg_out), .en(inst_load));
-   mux inst_mux (.a(ram_out), .b(inst_reg_out), .sel(inst_mux_sel), .out(inst));
+   register inst_reg (.clk(clk), .din(ram_rdata), .dout(inst_reg_out), .en(inst_load));
+   mux inst_mux (.a(ram_rdata), .b(inst_reg_out), .sel(inst_mux_sel), .out(inst));
 
    decode decode (.inst(inst), .opcode(opcode),
                   .rd(rd), .rs1(rs1), .rs2(rs2),

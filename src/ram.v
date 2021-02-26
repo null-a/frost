@@ -11,10 +11,6 @@ module ram(input clk,
       dout = 0;
    end
 
-   initial begin
-      $readmemh(`ifdef ISA_TEST {"../tests/", `ISA_TEST, ".hex"} `else "ram.hex" `endif, ram);
-   end
-
    // Left word is address 0 to avoid this warning:
    // https://github.com/steveicarus/iverilog/issues/343
    reg [31:0] ram [0:2048-1];
