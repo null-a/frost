@@ -57,29 +57,54 @@ module fifo
       r_ptr_next = r_ptr_reg;
       full_next = full_reg;
       empty_next = empty_reg;
-      case ({wr, rd})
-        // 2'b00: no op
-        2'b01: begin // read
-           if (~empty_reg) begin
-              r_ptr_next = r_ptr_succ;
-              full_next = 1'b0;
-              if (r_ptr_succ == w_ptr_reg)
-                empty_next = 1'b1;
-           end
-        end
-        2'b10: begin // write
-           if (~full_reg) begin
-              w_ptr_next = w_ptr_succ;
-              empty_next = 1'b0;
-              if (w_ptr_succ == r_ptr_reg)
-                full_next =  1'b1;
-           end
-        end
-        2'b11: begin // write and read
-           w_ptr_next = w_ptr_succ;
-           r_ptr_next = r_ptr_succ;
-        end
-      endcase // case ({wr, rd})
+
+      // TODO: Clean-up.
+
+      // I think there's a bug in the original case for a read and
+      // write happening, for the case where the buffer is empty. This
+      // attempts to fix that. Doing so seems to improve things.
+
+      if (rd & ~wr & ~empty) begin
+         r_ptr_next = r_ptr_succ;
+         full_next = 1'b0;
+         if (r_ptr_succ == w_ptr_reg)
+           empty_next = 1'b1;
+      end
+      else if ((wr & ~rd & ~full) | (rd & wr & empty)) begin
+         w_ptr_next = w_ptr_succ;
+         empty_next = 1'b0;
+         if (w_ptr_succ == r_ptr_reg)
+           full_next =  1'b1;
+      end
+      else if (rd & wr & ~empty) begin
+         w_ptr_next = w_ptr_succ;
+         r_ptr_next = r_ptr_succ;
+      end
+
+      // case ({wr, rd})
+      //   // 2'b00: no op
+      //   2'b01: begin // read
+      //      if (~empty_reg) begin
+      //         r_ptr_next = r_ptr_succ;
+      //         full_next = 1'b0;
+      //         if (r_ptr_succ == w_ptr_reg)
+      //           empty_next = 1'b1;
+      //      end
+      //   end
+      //   2'b10: begin // write
+      //      if (~full_reg) begin
+      //         w_ptr_next = w_ptr_succ;
+      //         empty_next = 1'b0;
+      //         if (w_ptr_succ == r_ptr_reg)
+      //           full_next =  1'b1;
+      //      end
+      //   end
+      //   2'b11: begin // write and read
+      //      w_ptr_next = w_ptr_succ;
+      //      r_ptr_next = r_ptr_succ;
+      //   end
+      // endcase // case ({wr, rd})
+
    end // always @ *
 
 endmodule // fifo
