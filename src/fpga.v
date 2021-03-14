@@ -40,8 +40,14 @@ module fpga (input CLK,
       end
    end
 
+   // Clean-up async rx input to avoid meta-stability.
+   // TODO: This probably ought to have (at least) a second DFF.
+   reg rx = 0;
+   always @(posedge clk)
+     rx <= PIN_20;
+
    top top (.clk(clk), .reset(~ready),
-            .rx(PIN_20), .tx(PIN_21),
+            .rx(rx), .tx(PIN_21),
             .out(LED));
 
 endmodule // fpga
