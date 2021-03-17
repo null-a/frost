@@ -6,7 +6,7 @@ module cpu(input clk,
            output [31:0] wdata,
            output [29:0] addr,
            output re,
-           output we);
+           output [3:0] we);
 
    wire [1:0] step;
    wire halt;

@@ -4,7 +4,7 @@ module ram(input clk,
            input [10:0] addr,
            input [31:0] din,
            input re,
-           input we,
+           input [3:0] we,
            output reg [31:0] dout);
 
    // Specifying an initial value as below prevent yosys inferring a
@@ -31,9 +31,10 @@ module ram(input clk,
       if (re) begin
          dout <= ram[addr];
       end
-      if (we) begin
-         ram[addr] <= din;
-      end
+      if (we[0]) ram[addr][7:0]   <= din[7:0];
+      if (we[1]) ram[addr][15:8]  <= din[15:8];
+      if (we[2]) ram[addr][23:16] <= din[23:16];
+      if (we[3]) ram[addr][31:24] <= din[31:24];
    end
 
 endmodule // ram

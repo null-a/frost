@@ -7,7 +7,7 @@ module top (input clk,
             output reg out);
 
    wire re;
-   wire we;
+   wire [3:0] we;
    wire [29:0] addr;
    wire [31:0] rdata;
    wire [31:0] wdata;

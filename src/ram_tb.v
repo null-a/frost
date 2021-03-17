@@ -13,7 +13,7 @@ module ram_tb;
    reg [10:0] addr = 2;
    reg [31:0] din = 0;
    reg re = 0;
-   reg we = 0;
+   reg [3:0] we = 0;
    wire [31:0] dout;
 
    ram dut (.clk(clk), .addr(addr), .din(din),

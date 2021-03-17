@@ -21,7 +21,7 @@ module isa_tb;
    wire [31:0] rdata;
    wire [31:0] wdata;
    wire re;
-   wire we;
+   wire [3:0] we;
 
    cpu cpu (.clk(clk),
             .addr(addr), .wdata(wdata), .rdata(rdata),
