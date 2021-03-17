@@ -27,7 +27,7 @@ module isa_tb;
             .addr(addr), .wdata(wdata), .rdata(rdata),
             .re(re), .we(we));
 
-   ram ram (.clk(clk), .addr(addr),
+   ram ram (.clk(clk), .addr(addr[10:0]),
             .din(wdata), .dout(rdata),
             .re(re), .we(we));
 

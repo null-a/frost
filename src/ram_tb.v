@@ -10,7 +10,7 @@ module ram_tb;
       #10 clk = (clk === 1'b0);
    end
 
-   reg [31:0] addr = 2;
+   reg [10:0] addr = 2;
    reg [31:0] din = 0;
    reg re = 0;
    reg we = 0;

@@ -1,7 +1,7 @@
 `default_nettype none
 
 module ram(input clk,
-           input [29:0] addr,
+           input [10:0] addr,
            input [31:0] din,
            input re,
            input we,
@@ -29,10 +29,10 @@ module ram(input clk,
 
    always @(posedge clk) begin
       if (re) begin
-         dout <= ram[addr[10:0]];
+         dout <= ram[addr];
       end
       if (we) begin
-         ram[addr[10:0]] <= din;
+         ram[addr] <= din;
       end
    end
 

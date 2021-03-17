@@ -29,7 +29,7 @@ module top (input clk,
 
    assign ram_en = addr[29:14] == 16'b0;
 
-   ram ram (.clk(clk), .addr(addr),
+   ram ram (.clk(clk), .addr(addr[10:0]),
             .din(wdata), .dout(ram_rdata),
             .re(ram_en & re), .we(ram_en & we));
 
