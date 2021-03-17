@@ -12,19 +12,7 @@ module mem(input clk,
            input [31:0] addr_in,
            output [29:0] addr_out);
 
-   // TODO: Fix duplication with control.v
-   localparam LNONE = 3'b011;
-   localparam SNONE = 2'b11;
-
-   localparam LB    = 3'b000;
-   localparam LH    = 3'b001;
-   localparam LW    = 3'b010;
-   localparam LBU   = 3'b100;
-   localparam LHU   = 3'b101;
-
-   localparam SB = 2'b00;
-   localparam SH = 2'b01;
-   localparam SW = 2'b10;
+   `include "defs.inc"
 
    wire [1:0] addr_lo;
    wire [29:0] addr_hi;
