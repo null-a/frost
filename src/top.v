@@ -31,11 +31,11 @@ module top (input clk,
 
    ram ram (.clk(clk), .addr(addr[10:0]),
             .din(wdata), .dout(ram_rdata),
-            .re(ram_en & re), .we(ram_en & we));
+            .re(ram_en & re), .we(ram_en ? we : 4'b0));
 
 
    // Write port available at 0x10000.
-   assign wr_uart = we & addr == 30'h4000;
+   assign wr_uart = &we & addr == 30'h4000;
    // Read port available at 0x10004.
    assign rd_uart = re & addr == 30'h4001;
 
@@ -63,7 +63,7 @@ module top (input clk,
    // hence 0x100 below.)
 
    always @(posedge clk) begin
-      if (addr[8:0] == 9'b100000000 & we) begin
+      if (addr[8:0] == 9'b100000000 & &we) begin
          out <= wdata[0];
       end
    end
