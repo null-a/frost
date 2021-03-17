@@ -16,18 +16,18 @@ set -e
 ./run_test.sh jal2
 ./run_test.sh jalr
 ./run_test.sh jalr2
-# ./run_test.sh lb
-# ./run_test.sh lbu
-# ./run_test.sh lh
-# ./run_test.sh lhu
+./run_test.sh lb
+./run_test.sh lbu
+./run_test.sh lh
+./run_test.sh lhu
 ./run_test.sh lui
 ./run_test.sh lw
 ./run_test.sh or
 ./run_test.sh ori
-# ./run_test.sh sb
-# ./run_test.sh sb2
-# ./run_test.sh sh
-# ./run_test.sh sh2
+./run_test.sh sb
+./run_test.sh sb2
+./run_test.sh sh
+./run_test.sh sh2
 ./run_test.sh simple
 ./run_test.sh sll
 ./run_test.sh slli

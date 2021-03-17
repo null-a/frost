@@ -58,7 +58,7 @@ module cpu(input clk,
                    .mem_addr_sel(mem_addr_sel), .mem_read_op(mem_read_op), .mem_write_op(mem_write_op),
                    .inst_load(inst_load), .inst_mux_sel(inst_mux_sel));
 
-   mem mem (.read_op(mem_read_op), .write_op(mem_write_op),
+   mem mem (.clk(clk), .read_op(mem_read_op), .write_op(mem_write_op),
             .re(re), .we(we),
             .rdata_in(rdata), .rdata_out(rdata_internal),
             .wdata_in(r2), .wdata_out(wdata),
