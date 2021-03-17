@@ -24,8 +24,8 @@ module isa_tb;
    wire we;
 
    cpu cpu (.clk(clk),
-            .ram_addr(addr), .ram_wdata(wdata), .ram_rdata(rdata),
-            .ram_re(re), .ram_we(we));
+            .addr(addr), .wdata(wdata), .rdata(rdata),
+            .re(re), .we(we));
 
    ram ram (.clk(clk), .addr(addr),
             .din(wdata), .dout(rdata),

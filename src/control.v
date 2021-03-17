@@ -19,9 +19,9 @@ module control(input clk,
                output reg [4:0] alu_op,
                output target_load,
                output [1:0] wd_sel,
-               output ram_addr_sel,
-               output ram_re,
-               output ram_we,
+               output mem_addr_sel,
+               output mem_re,
+               output mem_we,
                output inst_load,
                output inst_mux_sel);
 
@@ -69,10 +69,10 @@ module control(input clk,
    assign wd_sel = (opcode == JAL || opcode == JALR) ? 2'b01 :
                    opcode == LOAD ? 2'b11 : 2'b00;
 
-   assign ram_addr_sel = step == 2;
+   assign mem_addr_sel = step == 2;
 
-   assign ram_re = step == 0 || (step == 2 && opcode == LOAD);
-   assign ram_we = step == 2 && opcode == STORE;
+   assign mem_re = step == 0 || (step == 2 && opcode == LOAD);
+   assign mem_we = step == 2 && opcode == STORE;
 
    assign target_load = step == 1 || (step == 2 && opcode == JALR);
 

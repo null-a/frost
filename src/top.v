@@ -24,8 +24,8 @@ module top (input clk,
    wire tx_full;
 
    cpu cpu (.clk(clk), .reset(reset),
-            .ram_addr(addr), .ram_wdata(wdata), .ram_rdata(rdata),
-            .ram_re(re), .ram_we(we));
+            .addr(addr), .wdata(wdata), .rdata(rdata),
+            .re(re), .we(we));
 
    assign ram_en = addr[29:14] == 16'b0;
 
