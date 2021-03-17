@@ -20,8 +20,8 @@ module control(input clk,
                output target_load,
                output [1:0] wd_sel,
                output mem_addr_sel,
-               output mem_re,
-               output mem_we,
+               output [2:0] mem_read_op,
+               output [1:0] mem_write_op,
                output inst_load,
                output inst_mux_sel);
 
@@ -38,6 +38,14 @@ module control(input clk,
    localparam MISC_MEM = 7'b0001111;
    localparam SYSTEM   = 7'b1110011;
 
+   localparam LB    = 3'b000;
+   localparam LH    = 3'b001;
+   localparam LW    = 3'b010;
+   localparam LBU   = 3'b100;
+   localparam LHU   = 3'b101;
+
+   localparam LNONE = 3'b011;
+   localparam SNONE = 2'b11;
 
    initial begin
       step = 0;
@@ -71,8 +79,12 @@ module control(input clk,
 
    assign mem_addr_sel = step == 2;
 
-   assign mem_re = step == 0 || (step == 2 && opcode == LOAD);
-   assign mem_we = step == 2 && opcode == STORE;
+   assign mem_read_op = step == 0                  ? LW :
+                        step == 2 & opcode == LOAD ? funct3 :
+                        /* otherwise */              LNONE;
+
+   assign mem_write_op = step == 2 & opcode == STORE ? funct3[1:0] :
+                         /* otherwise */               SNONE;
 
    assign target_load = step == 1 || (step == 2 && opcode == JALR);
 

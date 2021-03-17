@@ -42,9 +42,11 @@ module cpu(input clk,
    wire inst_load;
    wire inst_mux_sel;
    wire mem_addr_sel;
+   wire [2:0] mem_read_op;
+   wire [1:0] mem_write_op;
    wire [31:0] target;
-
-   assign wdata = r2;
+   wire [31:0] rdata_internal;
+   wire [31:0] addr_internal;
 
    control control(.clk(clk), .reset(reset), .opcode(opcode), .funct3(funct3), .bit20(bit20), .bit30(bit30),
                    .cmp_out(alu_out[0]),
@@ -53,25 +55,30 @@ module cpu(input clk,
                    .reg_re1(reg_re1), .reg_re2(reg_re2), .reg_we(reg_we),
                    .alu_sel1(alu_sel1), .alu_sel2(alu_sel2), .alu_op(alu_op),
                    .target_load(target_load), .wd_sel(wd_sel),
-                   .mem_addr_sel(mem_addr_sel), .mem_re(re), .mem_we(we),
+                   .mem_addr_sel(mem_addr_sel), .mem_read_op(mem_read_op), .mem_write_op(mem_write_op),
                    .inst_load(inst_load), .inst_mux_sel(inst_mux_sel));
+
+   mem mem (.read_op(mem_read_op), .write_op(mem_write_op),
+            .re(re), .we(we),
+            .rdata_in(rdata), .rdata_out(rdata_internal),
+            .wdata_in(r2), .wdata_out(wdata),
+            .addr_in(addr_internal), .addr_out(addr));
 
    program_counter program_counter (.clk(clk), .reset(reset), .en(pc_enable), .load(pc_load),
                                     .target(target), .pc(pc), .pc_plus_4(pc_plus_4));
 
-   mux4 wd_mux (.a(alu_out), .b(pc_plus_4), .c(32'b0), .d(rdata),
+   mux4 wd_mux (.a(alu_out), .b(pc_plus_4), .c(32'b0), .d(rdata_internal),
                 .sel(wd_sel), .out(wd));
 
    reg_file reg_file (.clk(clk), .ra1(rs1), .ra2(rs2), .wa(rd),
                       .din(wd), .re1(reg_re1), .re2(reg_re2),
                       .we(reg_we), .dout1(r1), .dout2(r2));
 
-   mux #(.WIDTH(30)) mem_addr_mux (.a(pc[31:2]), .b(alu_out[31:2]), .out(addr),
-                               .sel(mem_addr_sel));
+   mux #(.WIDTH(32)) mem_addr_mux (.a(pc), .b(alu_out), .out(addr_internal), .sel(mem_addr_sel));
 
    // This combination might be abstracted as a transparent flip-flop?
-   register inst_reg (.clk(clk), .din(rdata), .dout(inst_reg_out), .en(inst_load));
-   mux inst_mux (.a(rdata), .b(inst_reg_out), .sel(inst_mux_sel), .out(inst));
+   register inst_reg (.clk(clk), .din(rdata_internal), .dout(inst_reg_out), .en(inst_load));
+   mux inst_mux (.a(rdata_internal), .b(inst_reg_out), .sel(inst_mux_sel), .out(inst));
 
    decode decode (.inst(inst), .opcode(opcode),
                   .rd(rd), .rs1(rs1), .rs2(rs2),
