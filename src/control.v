@@ -21,13 +21,12 @@ module control(input clk,
                output mem_addr_sel,
                output [2:0] mem_read_op,
                output [1:0] mem_write_op,
-               output inst_load,
-               output inst_mux_sel);
+               output inst_load);
 
    `include "defs.inc"
 
-   localparam FETCH1 = 3'd0;
-   localparam FETCH2 = 3'd1;
+   localparam FETCH1 = 3'd0; // Load the instruction in RAM.
+   localparam FETCH2 = 3'd1; // Transfer to instruction register.
    localparam DECODE = 3'd2;
    localparam MEM    = 3'd3;
    localparam EXEC   = 3'd4;
@@ -66,12 +65,14 @@ module control(input clk,
 
    assign mem_addr_sel = step == MEM;
 
-   assign mem_read_op = step == FETCH2               ? LW :
+   assign mem_read_op = step == FETCH1               ? LW :
                         step == MEM & opcode == LOAD ? funct3 :
                         /* otherwise */                LNONE;
 
    assign mem_write_op = step == MEM & opcode == STORE ? funct3[1:0] :
                          /* otherwise */                 SNONE;
+
+   assign inst_load = step == FETCH2;
 
    assign target_load = step == DECODE || (step == MEM && opcode == JALR);
 
@@ -106,8 +107,5 @@ module control(input clk,
         default:                alu_op = {1'b0, 1'b0,  3'b0};
       endcase // casez ({step, opcode, funct3})
    end
-
-   assign inst_load = step == DECODE;
-   assign inst_mux_sel = step == MEM || step == EXEC;
 
 endmodule // control

@@ -39,7 +39,6 @@ module cpu(input clk,
    wire target_load;
    wire [1:0] wd_sel;
    wire inst_load;
-   wire inst_mux_sel;
    wire mem_addr_sel;
    wire [2:0] mem_read_op;
    wire [1:0] mem_write_op;
@@ -55,7 +54,7 @@ module cpu(input clk,
                    .alu_sel1(alu_sel1), .alu_sel2(alu_sel2), .alu_op(alu_op),
                    .target_load(target_load), .wd_sel(wd_sel),
                    .mem_addr_sel(mem_addr_sel), .mem_read_op(mem_read_op), .mem_write_op(mem_write_op),
-                   .inst_load(inst_load), .inst_mux_sel(inst_mux_sel));
+                   .inst_load(inst_load));
 
    mem mem (.clk(clk), .read_op(mem_read_op), .write_op(mem_write_op),
             .re(re), .we(we),
@@ -75,9 +74,7 @@ module cpu(input clk,
 
    mux #(.WIDTH(32)) mem_addr_mux (.a(pc), .b(alu_out), .out(addr_internal), .sel(mem_addr_sel));
 
-   // This combination might be abstracted as a transparent flip-flop?
-   register inst_reg (.clk(clk), .din(rdata_internal), .dout(inst_reg_out), .en(inst_load));
-   mux inst_mux (.a(rdata_internal), .b(inst_reg_out), .sel(inst_mux_sel), .out(inst));
+   register inst_reg (.clk(clk), .din(rdata_internal), .dout(inst), .en(inst_load));
 
    decode decode (.inst(inst), .opcode(opcode),
                   .rd(rd), .rs1(rs1), .rs2(rs2),
