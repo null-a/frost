@@ -23,7 +23,7 @@ module isa_tb;
    wire re;
    wire [3:0] we;
 
-   cpu cpu (.clk(clk),
+   cpu cpu (.clk(clk), .reset(1'b0),
             .addr(addr), .wdata(wdata), .rdata(rdata),
             .re(re), .we(we));
 
@@ -34,9 +34,8 @@ module isa_tb;
    initial begin
       $readmemh({"../tests/", `ISA_TEST, ".hex"}, ram.ram);
 
-      `ifdef SIM
       // $dumpfile("isa.vcd");
-      // $dumpvars(0, cpu_tb);
+      // $dumpvars(0, isa_tb);
       // $dumpvars(1, cpu.reg_file.file1[0]);
       // $dumpvars(1, cpu.reg_file.file1[1]);
       // $dumpvars(1, cpu.reg_file.file1[2]);
@@ -44,7 +43,6 @@ module isa_tb;
       // $dumpvars(1, cpu.reg_file.file1[4]);
       // $dumpvars(1, cpu.reg_file.file1[28]);
       // $dumpvars(1, cpu.reg_file.file1[31]);
-      `endif
 
       wait (cpu.halt == 1 || cycle == 10_000) #20;
       $display("test=%6s cycle=%d, halt=%d, pc=%d, x28=%d, result=%s",
