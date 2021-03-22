@@ -27,6 +27,11 @@ module control(input clk,
 
    `include "defs.inc"
 
+   localparam FETCH  = 2'd0;
+   localparam DECODE = 2'd1;
+   localparam MEM    = 2'd2;
+   localparam EXEC   = 2'd3;
+
    initial begin
       step = 0;
    end
@@ -45,41 +50,41 @@ module control(input clk,
    end
 
    assign halt = opcode == SYSTEM && bit20;
-   assign pc_enable = step == 3 && !halt;
-   assign pc_load = step == 3 && ((opcode == BRANCH && cmp_out) || opcode == JAL || opcode == JALR);
+   assign pc_enable = step == EXEC && !halt;
+   assign pc_load = step == EXEC && ((opcode == BRANCH && cmp_out) || opcode == JAL || opcode == JALR);
 
-   assign reg_re1 = step == 1;
-   assign reg_re2 = step == 1;
-   assign reg_we = step == 3 && (opcode == OP_IMM || opcode == LUI || opcode == OP ||
-                                 opcode == AUIPC || opcode == JAL || opcode == JALR ||
-                                 opcode == LOAD);
+   assign reg_re1 = step == DECODE;
+   assign reg_re2 = step == DECODE;
+   assign reg_we = step == EXEC && (opcode == OP_IMM || opcode == LUI || opcode == OP ||
+                                    opcode == AUIPC || opcode == JAL || opcode == JALR ||
+                                    opcode == LOAD);
 
    assign wd_sel = (opcode == JAL || opcode == JALR) ? 2'b01 :
                    opcode == LOAD ? 2'b11 : 2'b00;
 
-   assign mem_addr_sel = step == 2;
+   assign mem_addr_sel = step == MEM;
 
-   assign mem_read_op = step == 0                  ? LW :
-                        step == 2 & opcode == LOAD ? funct3 :
-                        /* otherwise */              LNONE;
+   assign mem_read_op = step == FETCH                ? LW :
+                        step == MEM & opcode == LOAD ? funct3 :
+                        /* otherwise */                LNONE;
 
-   assign mem_write_op = step == 2 & opcode == STORE ? funct3[1:0] :
-                         /* otherwise */               SNONE;
+   assign mem_write_op = step == MEM & opcode == STORE ? funct3[1:0] :
+                         /* otherwise */                 SNONE;
 
-   assign target_load = step == 1 || (step == 2 && opcode == JALR);
+   assign target_load = step == DECODE || (step == MEM && opcode == JALR);
 
    always @(*) begin
       casez ({step, opcode})
-        {2'd1, 7'b?},
-        {2'd3, AUIPC}:
+        {DECODE, 7'b?},
+        {EXEC,   AUIPC}:
           begin
              alu_sel1 = 1; alu_sel2 = 1;
           end
-        {2'd3, OP_IMM},
-        {2'd3, LUI},
-        {2'd2, LOAD},
-        {2'd2, STORE},
-        {2'd2, JALR}:
+        {EXEC,   OP_IMM},
+        {EXEC,   LUI},
+        {MEM,    LOAD},
+        {MEM,    STORE},
+        {MEM,    JALR}:
           begin
              alu_sel1 = 0; alu_sel2 = 1;
           end
@@ -92,15 +97,15 @@ module control(input clk,
 
    always @(*) begin
       casez ({step, opcode, funct3})
-        {2'd3, OP_IMM, 3'b101}: alu_op = {1'b0, bit30, funct3};
-        {2'd3, OP,     3'b?}:   alu_op = {1'b0, bit30, funct3};
-        {2'd3, OP_IMM, 3'b?}:   alu_op = {1'b0, 1'b0,  funct3};
-        {2'd3, BRANCH, 3'b?}:   alu_op = {1'b1, 1'b0,  funct3};
-        default:                 alu_op = {1'b0, 1'b0,  3'b0};
+        {EXEC, OP_IMM, 3'b101}: alu_op = {1'b0, bit30, funct3};
+        {EXEC, OP,     3'b?}:   alu_op = {1'b0, bit30, funct3};
+        {EXEC, OP_IMM, 3'b?}:   alu_op = {1'b0, 1'b0,  funct3};
+        {EXEC, BRANCH, 3'b?}:   alu_op = {1'b1, 1'b0,  funct3};
+        default:                alu_op = {1'b0, 1'b0,  3'b0};
       endcase // casez ({step, opcode, funct3})
    end
 
-   assign inst_load = step == 1;
-   assign inst_mux_sel = step == 2 || step == 3;
+   assign inst_load = step == DECODE;
+   assign inst_mux_sel = step == MEM || step == EXEC;
 
 endmodule // control
