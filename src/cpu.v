@@ -8,7 +8,6 @@ module cpu(input clk,
            output re,
            output [3:0] we);
 
-   wire [1:0] step;
    wire halt;
    wire pc_enable;
    wire pc_load;
@@ -50,7 +49,7 @@ module cpu(input clk,
 
    control control(.clk(clk), .reset(reset), .opcode(opcode), .funct3(funct3), .bit20(bit20), .bit30(bit30),
                    .cmp_out(alu_out[0]),
-                   .step(step), .halt(halt),
+                   .halt(halt),
                    .pc_enable(pc_enable), .pc_load(pc_load),
                    .reg_re1(reg_re1), .reg_re2(reg_re2), .reg_we(reg_we),
                    .alu_sel1(alu_sel1), .alu_sel2(alu_sel2), .alu_op(alu_op),

@@ -7,7 +7,6 @@ module control(input clk,
                input bit20,
                input bit30,
                input cmp_out,
-               output reg [1:0] step,
                output halt,
                output pc_enable,
                output pc_load,
@@ -31,6 +30,8 @@ module control(input clk,
    localparam DECODE = 2'd1;
    localparam MEM    = 2'd2;
    localparam EXEC   = 2'd3;
+
+   reg [1:0] step;
 
    initial begin
       step = 0;
