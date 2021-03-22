@@ -26,20 +26,21 @@ module control(input clk,
 
    `include "defs.inc"
 
-   localparam FETCH  = 2'd0;
-   localparam DECODE = 2'd1;
-   localparam MEM    = 2'd2;
-   localparam EXEC   = 2'd3;
+   localparam FETCH1 = 3'd0;
+   localparam FETCH2 = 3'd1;
+   localparam DECODE = 3'd2;
+   localparam MEM    = 3'd3;
+   localparam EXEC   = 3'd4;
 
-   reg [1:0] step;
+   reg [2:0] step;
 
    initial begin
       step = 0;
    end
 
-   wire [1:0] next_step;
+   wire [2:0] next_step;
 
-   assign next_step = step + 1;
+   assign next_step = step == 4 ? 0 : step + 1;
 
    always @(posedge clk) begin
       if (reset) begin
@@ -65,7 +66,7 @@ module control(input clk,
 
    assign mem_addr_sel = step == MEM;
 
-   assign mem_read_op = step == FETCH                ? LW :
+   assign mem_read_op = step == FETCH2               ? LW :
                         step == MEM & opcode == LOAD ? funct3 :
                         /* otherwise */                LNONE;
 
