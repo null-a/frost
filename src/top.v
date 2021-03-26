@@ -17,8 +17,9 @@ module top (input clk,
 
    wire ram_en;
 
-   wire rd_uart;
+   wire rd_uart, rd_uart_reg;
    reg rd_uart_prev = 0;
+   reg rd_uart_reg_prev = 0;
    wire wr_uart;
    wire rx_empty;
    wire tx_full;
@@ -34,19 +35,23 @@ module top (input clk,
             .re(ram_en & re), .we(ram_en ? we : 4'b0));
 
 
-   // Write port available at 0x10000.
+   // Write port available at 0x10000 (tx).
    assign wr_uart = &we & addr == 30'h4000;
-   // Read port available at 0x10004.
-   assign rd_uart = re & addr == 30'h4001;
+
+   // Read port available at 0x10000 (tx) and 0x10004 (rx).
+   assign rd_uart = re & ((addr == 30'h4000) | (addr == 30'h4001));
+   assign rd_uart_reg = addr[0]; // Which UART register as we reading from?
 
    // We delay by one cycle to ensure the data is presented when the
    // CPU expects. (This mimics the register on the output of RAM.)
    always @(posedge clk) begin
       rd_uart_prev <= rd_uart;
+      rd_uart_reg_prev <= rd_uart_reg;
    end
 
-   mux rdata_mux (.a(ram_rdata), .b({23'b0, rx_empty, uart_rdata}),
-                  .sel(rd_uart_prev), .out(rdata));
+   assign rdata = ~rd_uart_prev            ? ram_rdata :
+                  rd_uart_reg_prev == 1'b0 ? {31'b0, tx_full} :
+                  /* otherwise */            {23'b0, rx_empty, uart_rdata};
 
    // Do I need to reset on the FPGA, given I can specify initial
    // values for registers? Does dropping it save resources?

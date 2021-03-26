@@ -3,6 +3,8 @@ volatile int *uart_read_reg = (int*)0x10004;
 
 void putchar(int c)
 {
+  // Ensure there's room in the tx buffer.
+  while(*uart_write_reg);
   *uart_write_reg = c;
 }
 

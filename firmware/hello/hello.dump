@@ -6,7 +6,7 @@ Disassembly of section .text:
 
 00000000 <_start>:
    0:	7fc00113          	li	x2,2044
-   4:	08c000ef          	jal	x1,90 <main>
+   4:	09c000ef          	jal	x1,a0 <main>
    8:	00100073          	ebreak
 
 0000000c <putchar>:
@@ -14,66 +14,70 @@ Disassembly of section .text:
   10:	00812e23          	sw	x8,28(x2)
   14:	02010413          	addi	x8,x2,32
   18:	fea42623          	sw	x10,-20(x8)
-  1c:	0d002783          	lw	x15,208(x0) # d0 <uart_write_reg>
-  20:	fec42703          	lw	x14,-20(x8)
-  24:	00e7a023          	sw	x14,0(x15)
-  28:	00000013          	nop
-  2c:	01c12403          	lw	x8,28(x2)
-  30:	02010113          	addi	x2,x2,32
-  34:	00008067          	ret
+  1c:	00000013          	nop
+  20:	0e002783          	lw	x15,224(x0) # e0 <uart_write_reg>
+  24:	0007a783          	lw	x15,0(x15)
+  28:	fe079ce3          	bnez	x15,20 <putchar+0x14>
+  2c:	0e002783          	lw	x15,224(x0) # e0 <uart_write_reg>
+  30:	fec42703          	lw	x14,-20(x8)
+  34:	00e7a023          	sw	x14,0(x15)
+  38:	00000013          	nop
+  3c:	01c12403          	lw	x8,28(x2)
+  40:	02010113          	addi	x2,x2,32
+  44:	00008067          	ret
 
-00000038 <puts>:
-  38:	fd010113          	addi	x2,x2,-48
-  3c:	02112623          	sw	x1,44(x2)
-  40:	02812423          	sw	x8,40(x2)
-  44:	03010413          	addi	x8,x2,48
-  48:	fca42e23          	sw	x10,-36(x8)
-  4c:	0100006f          	j	5c <puts+0x24>
-  50:	fef44783          	lbu	x15,-17(x8)
-  54:	00078513          	mv	x10,x15
-  58:	fb5ff0ef          	jal	x1,c <putchar>
-  5c:	fdc42783          	lw	x15,-36(x8)
-  60:	00178713          	addi	x14,x15,1
-  64:	fce42e23          	sw	x14,-36(x8)
-  68:	0007c783          	lbu	x15,0(x15)
-  6c:	fef407a3          	sb	x15,-17(x8)
-  70:	fef44783          	lbu	x15,-17(x8)
-  74:	fc079ee3          	bnez	x15,50 <puts+0x18>
-  78:	00000013          	nop
-  7c:	00000013          	nop
-  80:	02c12083          	lw	x1,44(x2)
-  84:	02812403          	lw	x8,40(x2)
-  88:	03010113          	addi	x2,x2,48
-  8c:	00008067          	ret
+00000048 <puts>:
+  48:	fd010113          	addi	x2,x2,-48
+  4c:	02112623          	sw	x1,44(x2)
+  50:	02812423          	sw	x8,40(x2)
+  54:	03010413          	addi	x8,x2,48
+  58:	fca42e23          	sw	x10,-36(x8)
+  5c:	0100006f          	j	6c <puts+0x24>
+  60:	fef44783          	lbu	x15,-17(x8)
+  64:	00078513          	mv	x10,x15
+  68:	fa5ff0ef          	jal	x1,c <putchar>
+  6c:	fdc42783          	lw	x15,-36(x8)
+  70:	00178713          	addi	x14,x15,1
+  74:	fce42e23          	sw	x14,-36(x8)
+  78:	0007c783          	lbu	x15,0(x15)
+  7c:	fef407a3          	sb	x15,-17(x8)
+  80:	fef44783          	lbu	x15,-17(x8)
+  84:	fc079ee3          	bnez	x15,60 <puts+0x18>
+  88:	00000013          	nop
+  8c:	00000013          	nop
+  90:	02c12083          	lw	x1,44(x2)
+  94:	02812403          	lw	x8,40(x2)
+  98:	03010113          	addi	x2,x2,48
+  9c:	00008067          	ret
 
-00000090 <main>:
-  90:	ff010113          	addi	x2,x2,-16
-  94:	00112623          	sw	x1,12(x2)
-  98:	00812423          	sw	x8,8(x2)
-  9c:	01010413          	addi	x8,x2,16
-  a0:	0c000513          	li	x10,192
-  a4:	f95ff0ef          	jal	x1,38 <puts>
-  a8:	00000013          	nop
-  ac:	00078513          	mv	x10,x15
-  b0:	00c12083          	lw	x1,12(x2)
-  b4:	00812403          	lw	x8,8(x2)
-  b8:	01010113          	addi	x2,x2,16
-  bc:	00008067          	ret
+000000a0 <main>:
+  a0:	ff010113          	addi	x2,x2,-16
+  a4:	00112623          	sw	x1,12(x2)
+  a8:	00812423          	sw	x8,8(x2)
+  ac:	01010413          	addi	x8,x2,16
+  b0:	0d000513          	li	x10,208
+  b4:	f95ff0ef          	jal	x1,48 <puts>
+  b8:	00000793          	li	x15,0
+  bc:	00078513          	mv	x10,x15
+  c0:	00c12083          	lw	x1,12(x2)
+  c4:	00812403          	lw	x8,8(x2)
+  c8:	01010113          	addi	x2,x2,16
+  cc:	00008067          	ret
 
 Disassembly of section .rodata:
 
-000000c0 <.rodata>:
-  c0:	6568                	flw	f10,76(x10)
-  c2:	6c6c                	flw	f11,92(x8)
-  c4:	77202c6f          	jal	x24,2836 <uart_write_reg+0x2766>
-  c8:	646c726f          	jal	x4,c770e <uart_write_reg+0xc763e>
-  cc:	0021                	c.nop	8
+000000d0 <.rodata>:
+  d0:	6568                	flw	f10,76(x10)
+  d2:	6c6c                	flw	f11,92(x8)
+  d4:	77202c6f          	jal	x24,2846 <uart_write_reg+0x2766>
+  d8:	646c726f          	jal	x4,c771e <uart_write_reg+0xc763e>
+  dc:	0021                	c.nop	8
 
 Disassembly of section .sdata:
 
-000000d0 <uart_write_reg>:
-  d0:	0000                	unimp
-  d2:	0001                	nop
+000000e0 <uart_write_reg>:
+  e0:	0000                	unimp
+  e2:	0001                	nop
 
 Disassembly of section .riscv.attributes:
 

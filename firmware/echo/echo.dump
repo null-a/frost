@@ -6,7 +6,7 @@ Disassembly of section .text:
 
 00000000 <_start>:
    0:	7fc00113          	li	x2,2044
-   4:	078000ef          	jal	x1,7c <main>
+   4:	088000ef          	jal	x1,8c <main>
    8:	00100073          	ebreak
 
 0000000c <putchar>:
@@ -14,53 +14,57 @@ Disassembly of section .text:
   10:	00812e23          	sw	x8,28(x2)
   14:	02010413          	addi	x8,x2,32
   18:	fea42623          	sw	x10,-20(x8)
-  1c:	0a002783          	lw	x15,160(x0) # a0 <uart_write_reg>
-  20:	fec42703          	lw	x14,-20(x8)
-  24:	00e7a023          	sw	x14,0(x15)
-  28:	00000013          	nop
-  2c:	01c12403          	lw	x8,28(x2)
-  30:	02010113          	addi	x2,x2,32
-  34:	00008067          	ret
+  1c:	00000013          	nop
+  20:	0b002783          	lw	x15,176(x0) # b0 <uart_write_reg>
+  24:	0007a783          	lw	x15,0(x15)
+  28:	fe079ce3          	bnez	x15,20 <putchar+0x14>
+  2c:	0b002783          	lw	x15,176(x0) # b0 <uart_write_reg>
+  30:	fec42703          	lw	x14,-20(x8)
+  34:	00e7a023          	sw	x14,0(x15)
+  38:	00000013          	nop
+  3c:	01c12403          	lw	x8,28(x2)
+  40:	02010113          	addi	x2,x2,32
+  44:	00008067          	ret
 
-00000038 <getchar>:
-  38:	fe010113          	addi	x2,x2,-32
-  3c:	00812e23          	sw	x8,28(x2)
-  40:	02010413          	addi	x8,x2,32
-  44:	0a402783          	lw	x15,164(x0) # a4 <uart_read_reg>
-  48:	0007a783          	lw	x15,0(x15)
-  4c:	fef42623          	sw	x15,-20(x8)
-  50:	fec42783          	lw	x15,-20(x8)
-  54:	4087d793          	srai	x15,x15,0x8
-  58:	fef42423          	sw	x15,-24(x8)
-  5c:	fe842783          	lw	x15,-24(x8)
-  60:	fe0792e3          	bnez	x15,44 <getchar+0xc>
-  64:	fec42783          	lw	x15,-20(x8)
-  68:	0ff7f793          	andi	x15,x15,255
-  6c:	00078513          	mv	x10,x15
-  70:	01c12403          	lw	x8,28(x2)
-  74:	02010113          	addi	x2,x2,32
-  78:	00008067          	ret
+00000048 <getchar>:
+  48:	fe010113          	addi	x2,x2,-32
+  4c:	00812e23          	sw	x8,28(x2)
+  50:	02010413          	addi	x8,x2,32
+  54:	0b402783          	lw	x15,180(x0) # b4 <uart_read_reg>
+  58:	0007a783          	lw	x15,0(x15)
+  5c:	fef42623          	sw	x15,-20(x8)
+  60:	fec42783          	lw	x15,-20(x8)
+  64:	4087d793          	srai	x15,x15,0x8
+  68:	fef42423          	sw	x15,-24(x8)
+  6c:	fe842783          	lw	x15,-24(x8)
+  70:	fe0792e3          	bnez	x15,54 <getchar+0xc>
+  74:	fec42783          	lw	x15,-20(x8)
+  78:	0ff7f793          	andi	x15,x15,255
+  7c:	00078513          	mv	x10,x15
+  80:	01c12403          	lw	x8,28(x2)
+  84:	02010113          	addi	x2,x2,32
+  88:	00008067          	ret
 
-0000007c <main>:
-  7c:	ff010113          	addi	x2,x2,-16
-  80:	00112623          	sw	x1,12(x2)
-  84:	00812423          	sw	x8,8(x2)
-  88:	01010413          	addi	x8,x2,16
-  8c:	fadff0ef          	jal	x1,38 <getchar>
-  90:	00050793          	mv	x15,x10
-  94:	00078513          	mv	x10,x15
-  98:	f75ff0ef          	jal	x1,c <putchar>
-  9c:	ff1ff06f          	j	8c <main+0x10>
+0000008c <main>:
+  8c:	ff010113          	addi	x2,x2,-16
+  90:	00112623          	sw	x1,12(x2)
+  94:	00812423          	sw	x8,8(x2)
+  98:	01010413          	addi	x8,x2,16
+  9c:	fadff0ef          	jal	x1,48 <getchar>
+  a0:	00050793          	mv	x15,x10
+  a4:	00078513          	mv	x10,x15
+  a8:	f65ff0ef          	jal	x1,c <putchar>
+  ac:	ff1ff06f          	j	9c <main+0x10>
 
 Disassembly of section .sdata:
 
-000000a0 <uart_write_reg>:
-  a0:	0000                	unimp
-  a2:	0001                	nop
+000000b0 <uart_write_reg>:
+  b0:	0000                	unimp
+  b2:	0001                	nop
 
-000000a4 <uart_read_reg>:
-  a4:	0004                	0x4
-  a6:	0001                	nop
+000000b4 <uart_read_reg>:
+  b4:	0004                	0x4
+  b6:	0001                	nop
 
 Disassembly of section .riscv.attributes:
 
