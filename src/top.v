@@ -18,7 +18,7 @@ module top (input clk,
    wire ram_en;
 
    wire rd_uart;
-   reg rd_uart_reg = 0;
+   reg rd_uart_prev = 0;
    wire wr_uart;
    wire rx_empty;
    wire tx_full;
@@ -39,16 +39,14 @@ module top (input clk,
    // Read port available at 0x10004.
    assign rd_uart = re & addr == 30'h4001;
 
+   // We delay by one cycle to ensure the data is presented when the
+   // CPU expects. (This mimics the register on the output of RAM.)
    always @(posedge clk) begin
-      rd_uart_reg <= rd_uart;
+      rd_uart_prev <= rd_uart;
    end
 
    mux rdata_mux (.a(ram_rdata), .b({23'b0, rx_empty, uart_rdata}),
-                  .sel(rd_uart_reg), .out(rdata));
-
-   // wire [7:0] rw_data;
-   // wire rw;
-   // assign rw = ~rx_empty;
+                  .sel(rd_uart_prev), .out(rdata));
 
    // Do I need to reset on the FPGA, given I can specify initial
    // values for registers? Does dropping it save resources?
@@ -56,7 +54,7 @@ module top (input clk,
                             .rx(rx), .tx(tx),
                             .w_data(wdata[7:0]), .r_data(uart_rdata),
                             .rx_empty(rx_empty), .tx_full(tx_full),
-                            .wr_uart(wr_uart), .rd_uart(rd_uart_reg));
+                            .wr_uart(wr_uart), .rd_uart(rd_uart_prev));
 
    // A 1 bit output register. Accessed via the low bit of memory
    // address 0x400. (Low two bits of address lines are implicit,
