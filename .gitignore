@@ -6,4 +6,6 @@ venv/
 *.json
 *.vvp
 *.vcd
-src/ram.hex
+*.o
+*.elf
+
