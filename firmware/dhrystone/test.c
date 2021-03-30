@@ -2,6 +2,10 @@
 
 int main(void)
 {
-  printf("hello, world!");
+  printf("%d\n", time());
+  sleep(10);
+  printf("%d\n", time());
+  sleep(10);
+  printf("%d", time());
   return 0;
 }

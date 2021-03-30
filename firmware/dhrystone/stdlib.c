@@ -2,6 +2,7 @@
 #include "stdlib.h"
 
 volatile int *uart_write_reg = (int*)0x10000;
+volatile unsigned int *ms_count_reg = (unsigned int*)0x10008;
 
 void putchar(int c)
 {
@@ -79,4 +80,16 @@ void* malloc(int n)
     return p;
   } else
     return 0;
+}
+
+unsigned int time(void)
+{
+  return *ms_count_reg;
+}
+
+void sleep(unsigned int ms)
+{
+  unsigned int start;
+  start = time();
+  while (time() - start < ms);
 }

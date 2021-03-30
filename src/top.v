@@ -17,13 +17,6 @@ module top (input clk,
 
    wire ram_en;
 
-   wire rd_uart, rd_uart_reg;
-   reg rd_uart_prev = 0;
-   reg rd_uart_reg_prev = 0;
-   wire wr_uart;
-   wire rx_empty;
-   wire tx_full;
-
    cpu cpu (.clk(clk), .reset(reset),
             .addr(addr), .wdata(wdata), .rdata(rdata),
             .re(re), .we(we));
@@ -35,23 +28,60 @@ module top (input clk,
             .re(ram_en & re), .we(ram_en ? we : 4'b0));
 
 
-   // Write port available at 0x10000 (tx).
-   assign wr_uart = &we & addr == 30'h4000;
 
-   // Read port available at 0x10000 (tx) and 0x10004 (rx).
-   assign rd_uart = re & ((addr == 30'h4000) | (addr == 30'h4001));
-   assign rd_uart_reg = addr[0]; // Which UART register as we reading from?
+
+   // We need to multiple the appropriate data source onto `rdata` the
+   // cycle *after* the `re` tick. (Since there's an output register
+   // on RAM.) We need to remember sufficient information about the
+   // read address to facilitate this. We need to distinguish between
+   // RAM and any of the registers.
+
+   // TODO: Is this really necessary? Maybe it is already the case
+   // that the read address continues to be available during the cycle
+   // after the `re` tick. And if not, perhaps it's easy to arrange
+   // for this to be so?
+
+   //  Are we reading from RAM?
+   wire rd_ram;
+   assign rd_ram = addr < 30'h200; // 2K Byte
+
+   reg rd_ram_prev = 0;
+   always @(posedge clk) begin
+      rd_ram_prev <= rd_ram;
+   end
+
+   // Remember the low bits of the address to distinguish between
+   // registers. (This approach will result in the registers been
+   // mirrored across the whole address space above RAM.)
+   reg [1:0] addr_prev = 2'b0;
+
+   always @(posedge clk) begin
+      addr_prev <= addr[1:0];
+   end
+
+
+   wire rd_uart;
+   wire wr_uart;
+   // Write port available at 0x10000 (tx). (Can also be read to check
+   // tx_full.)
+   assign wr_uart = &we & addr == 30'h4000;
+   // Read port available at 0x10004 (rx).
+   assign rd_uart = re & addr == 30'h4001;
 
    // We delay by one cycle to ensure the data is presented when the
    // CPU expects. (This mimics the register on the output of RAM.)
+   reg rd_uart_prev = 0;
    always @(posedge clk) begin
       rd_uart_prev <= rd_uart;
-      rd_uart_reg_prev <= rd_uart_reg;
    end
 
-   assign rdata = ~rd_uart_prev            ? ram_rdata :
-                  rd_uart_reg_prev == 1'b0 ? {31'b0, tx_full} :
-                  /* otherwise */            {23'b0, rx_empty, uart_rdata};
+   assign rdata = rd_ram_prev        ? ram_rdata :
+                  addr_prev == 2'b00 ? {31'b0, tx_full} :
+                  addr_prev == 2'b01 ? {23'b0, rx_empty, uart_rdata} :
+                  /* otherwise */      ms_count;
+
+   wire rx_empty;
+   wire tx_full;
 
    // Do I need to reset on the FPGA, given I can specify initial
    // values for registers? Does dropping it save resources?
@@ -60,6 +90,9 @@ module top (input clk,
                             .w_data(wdata[7:0]), .r_data(uart_rdata),
                             .rx_empty(rx_empty), .tx_full(tx_full),
                             .wr_uart(wr_uart), .rd_uart(rd_uart_prev));
+
+   wire [31:0] ms_count;
+   ms_counter ms_counter (.clk(clk), .out(ms_count));
 
    // A 1 bit output register. Accessed via the low bit of memory
    // address 0x400. (Low two bits of address lines are implicit,
