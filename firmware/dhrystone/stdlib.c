@@ -93,3 +93,18 @@ void sleep(unsigned int ms)
   start = time();
   while (time() - start < ms);
 }
+
+// See K&R.
+void strcpy(char *s, char *t)
+{
+  while (*s++ = *t++);
+}
+
+// See K&R.
+int strcmp(char *s, char *t)
+{
+  for (; *s == *t; s++, t++)
+    if (*s == '\0') /* == *t */
+      return 0;
+  return *s - *t;
+}
