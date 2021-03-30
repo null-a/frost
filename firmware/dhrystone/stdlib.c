@@ -71,7 +71,7 @@ void printf(char *fmt, ...)
 static char allocbuf[ALLOCSIZE];
 static char *allocp = allocbuf;
 
-void* malloc(int n)
+char* malloc(int n)
 {
   char *p;
   if (allocbuf + ALLOCSIZE - allocp >= n) {

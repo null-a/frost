@@ -16,6 +16,7 @@
  */
 
 #include "dhry.h"
+#include "stdlib.h"
 
 /* Global Variables: */
 
@@ -28,7 +29,7 @@ char Ch_1_Glob,
 int Arr_1_Glob [50];
 int Arr_2_Glob [50] [50];
 
-extern char *malloc ();
+/* extern char *malloc (); */
 Enumeration Func_1 ();
  /* forward declaration necessary since Enumeration may not simply be int */
 
@@ -51,7 +52,7 @@ extern int times ();
  /* Measurements should last at least about 2 seconds */
 #endif
 #ifdef TIME
-extern long time();
+/* extern long time(); */
  /* see library function "time" */
 #define Too_Small_Time 2
  /* Measurements should last at least 2 seconds */
@@ -120,9 +121,9 @@ main ()
  }
  printf ("Please give the number of runs through the benchmark: ");
  {
- int n;
- scanf ("%d", &n);
- Number_Of_Runs = n;
+ /* int n; */
+ /* scanf ("%d", &n); */
+ Number_Of_Runs = 1;
  }
  printf ("\n");
 
@@ -137,7 +138,7 @@ main ()
  Begin_Time = (long) time_info.tms_utime;
 #endif
 #ifdef TIME
- Begin_Time = time ( (long *) 0);
+ Begin_Time = time();
 #endif
 #ifdef MSC_CLOCK
  Begin_Time = clock();
@@ -198,7 +199,7 @@ main ()
  End_Time = (long) time_info.tms_utime;
 #endif
 #ifdef TIME
- End_Time = time ( (long *) 0);
+ End_Time = time();
 #endif
 #ifdef MSC_CLOCK
  End_Time = clock();
