@@ -21,13 +21,13 @@ module top (input clk,
             .addr(addr), .wdata(wdata), .rdata(rdata),
             .re(re), .we(we));
 
-   assign ram_en = addr[29:14] == 16'b0;
+   localparam NUM_WORDS = 32 * 1024 / 4;
 
-   ram ram (.clk(clk), .addr(addr[10:0]),
-            .din(wdata), .dout(ram_rdata),
-            .re(ram_en & re), .we(ram_en ? we : 4'b0));
+   assign ram_en = addr < NUM_WORDS;
 
-
+   ram #(.NUM_WORDS(NUM_WORDS)) ram (.clk(clk), .addr(addr),
+                                     .din(wdata), .dout(ram_rdata),
+                                     .re(ram_en & re), .we(ram_en ? we : 4'b0));
 
 
    // We need to multiple the appropriate data source onto `rdata` the
@@ -41,13 +41,9 @@ module top (input clk,
    // after the `re` tick. And if not, perhaps it's easy to arrange
    // for this to be so?
 
-   //  Are we reading from RAM?
-   wire rd_ram;
-   assign rd_ram = addr < 30'h200; // 2K Byte
-
-   reg rd_ram_prev = 0;
+   reg ram_en_prev = 0;
    always @(posedge clk) begin
-      rd_ram_prev <= rd_ram;
+      ram_en_prev <= ram_en;
    end
 
    // Remember the low bits of the address to distinguish between
@@ -75,7 +71,7 @@ module top (input clk,
       rd_uart_prev <= rd_uart;
    end
 
-   assign rdata = rd_ram_prev        ? ram_rdata :
+   assign rdata = ram_en_prev        ? ram_rdata :
                   addr_prev == 2'b00 ? {31'b0, tx_full} :
                   addr_prev == 2'b01 ? {23'b0, rx_empty, uart_rdata} :
                   /* otherwise */      ms_count;

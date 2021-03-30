@@ -65,7 +65,7 @@ extern clock_t clock();
 long Begin_Time,
  End_Time,
  User_Time;
-float Microseconds,
+int Microseconds,
  Dhrystones_Per_Second;
 
 /* end of variables for time measurement */
@@ -119,13 +119,13 @@ main ()
  printf ("Program compiled without 'register' attribute\n");
  printf ("\n");
  }
- printf ("Please give the number of runs through the benchmark: ");
- {
+ /* printf ("Please give the number of runs through the benchmark: "); */
+ /* { */
  /* int n; */
  /* scanf ("%d", &n); */
- Number_Of_Runs = 1;
- }
- printf ("\n");
+ Number_Of_Runs = 1000;
+ /* } */
+ /* printf ("\n"); */
 
  printf ("Execution starts, %d runs through Dhrystone\n", Number_Of_Runs);
 
@@ -269,9 +269,11 @@ main ()
  else
  {
 #ifdef TIME
- Microseconds = (float) User_Time * Mic_secs_Per_Second
- / (float) Number_Of_Runs;
- Dhrystones_Per_Second = (float) Number_Of_Runs / (float) User_Time;
+ /* Microseconds = (float) User_Time * Mic_secs_Per_Second */
+ /* / (float) Number_Of_Runs; */
+ /* Dhrystones_Per_Second = (float) Number_Of_Runs / (float) User_Time; */
+ Microseconds = (User_Time * 1000) / Number_Of_Runs;
+ Dhrystones_Per_Second = (1000 * Number_Of_Runs) / User_Time;
 #else
  Microseconds = (float) User_Time * Mic_secs_Per_Second
  / ((float) HZ * ((float) Number_Of_Runs));
@@ -279,9 +281,9 @@ main ()
  / (float) User_Time;
 #endif
  printf ("Microseconds for one run through Dhrystone: ");
- printf ("%6.1f \n", Microseconds);
+ printf ("%d\n", Microseconds);
  printf ("Dhrystones per Second: ");
- printf ("%6.1f \n", Dhrystones_Per_Second);
+ printf ("%d\n", Dhrystones_Per_Second);
  printf ("\n");
  }
 

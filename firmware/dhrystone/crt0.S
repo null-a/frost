@@ -1,6 +1,6 @@
         .text
         .global _start
 _start:
-        li sp, 2044             # Set the stack pointer
+        li sp, (32*1024-4)      # Set the stack pointer
         call main
         ebreak

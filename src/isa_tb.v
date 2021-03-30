@@ -27,9 +27,9 @@ module isa_tb;
             .addr(addr), .wdata(wdata), .rdata(rdata),
             .re(re), .we(we));
 
-   ram ram (.clk(clk), .addr(addr[10:0]),
-            .din(wdata), .dout(rdata),
-            .re(re), .we(we));
+   ram #(.NUM_WORDS(2048)) ram (.clk(clk), .addr(addr),
+                                .din(wdata), .dout(rdata),
+                                .re(re), .we(we));
 
    initial begin
       $readmemh({"../tests/", `ISA_TEST, ".hex"}, ram.ram);
