@@ -30,9 +30,11 @@ module ram
 
    integer i;
    initial begin
+      `ifdef SIM
       for (i=0; i<NUM_WORDS; i++) begin
          ram[i] = 32'b0;
       end
+      `endif
       `ifndef ISA_TEST
       $readmemh("firmware.hex", ram);
       `endif
