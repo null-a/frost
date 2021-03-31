@@ -29,4 +29,4 @@ dhry.elf: crt0.o stdlib.o dhry_1.o dhry_2.o
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@
 
 clean:
-	rm -f crt0.o stdlib.o dhry_1.o dhry_2.o
+	rm -f crt0.o stdlib.o dhry_1.o dhry_2.o dhry.elf dhry.bin dhry.hex dhry.dump
