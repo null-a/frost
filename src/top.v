@@ -21,7 +21,8 @@ module top (input clk,
             .addr(addr), .wdata(wdata), .rdata(rdata),
             .re(re), .we(we));
 
-   localparam NUM_WORDS = 32 * 1024 / 4;
+   localparam RAM_SIZE_KB = `ifdef RAM_SIZE_KB `RAM_SIZE_KB `else 8 `endif;
+   localparam NUM_WORDS = RAM_SIZE_KB * 1024 / 4;
 
    assign ram_en = addr < NUM_WORDS;
 
