@@ -16,4 +16,24 @@ SECTIONS {
     * (.text.startup);
     * (.text);
   }
+
+  .data : {
+    * (.rodata*);
+  }
+
+  __global_pointer$ = . + 0x800;
+
+  .sdata : {
+    * (.sdata);
+  }
+
+  .sbss : {
+    * (.sbss);
+  }
+
+  .bss : {
+    * (.bss);
+  }
+
+  /DISCARD/ : { * (*); }
 }
