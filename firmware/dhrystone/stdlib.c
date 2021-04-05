@@ -78,7 +78,7 @@ void printf(char *fmt, ...)
 }
 
 // Very simple memory allocation. See `alloc` in K&R.
-#define ALLOCSIZE 1024
+#define ALLOCSIZE 128
 
 static char allocbuf[ALLOCSIZE];
 static char *allocp = allocbuf;

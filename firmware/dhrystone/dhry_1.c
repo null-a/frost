@@ -211,6 +211,8 @@ main ()
 
  printf ("Execution ends\n");
  printf ("\n");
+
+#if 0 /* Omitting this to fit firmware in BRAM. */
  printf ("Final values of the variables used in the benchmark:\n");
  printf ("\n");
  printf ("Int_Glob: %d\n", Int_Glob);
@@ -261,6 +263,7 @@ main ()
  printf ("Str_2_Loc: %s\n", Str_2_Loc);
  printf (" should be: DHRYSTONE PROGRAM, 2'ND STRING\n");
  printf ("\n");
+#endif
 
  User_Time = End_Time - Begin_Time;
 

@@ -19,7 +19,7 @@ all: fpga.bin
 # Don't include fpga.v/pll.v when running iverilog, since it doesn't
 # know where to find the PLL primitives.
 %_tb.vvp: %_tb.v $(filter-out fpga.v pll.v, $(srcs))
-	iverilog -DSIM -DRAM_SIZE_KB=32 -o $@ $^
+	iverilog -DSIM -DRAM_SIZE_KB=14 -o $@ $^
 
 # I'm assuming that a test bench always makes a VCD file of similar
 # name.

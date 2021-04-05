@@ -6,6 +6,6 @@ _start:
         .option norelax
         la gp, __global_pointer$
         .option pop
-        li sp, (32*1024-4)      # Set the stack pointer
+        li sp, (14*1024-4)      # Set the stack pointer
         call main
         ebreak
