@@ -1,3 +1,4 @@
+int getchar();
 void putchar(int c);
 void puts(char *s);
 void print_uint(unsigned int i);

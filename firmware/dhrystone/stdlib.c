@@ -2,7 +2,19 @@
 #include "stdlib.h"
 
 volatile int *uart_write_reg = (int*)0x10000;
+volatile int *uart_read_reg = (int*)0x10004;
 volatile unsigned int *ms_count_reg = (unsigned int*)0x10008;
+
+int getchar()
+{
+  int reg, isempty;
+  for(;;) {
+    reg = *uart_read_reg;
+    isempty = reg >> 8;
+    if (!isempty)
+      return reg & 0xff;
+  }
+}
 
 void putchar(int c)
 {

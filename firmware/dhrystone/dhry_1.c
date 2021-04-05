@@ -106,6 +106,10 @@ main ()
  /* Warning: With 16-Bit processors and Number_Of_Runs > 32000, */
  /* overflow may occur for this array element. */
 
+ /* Wait on input. Gives a chance to establish serial connection. */
+ getchar();
+ getchar();
+
  printf ("\n");
  printf ("Dhrystone Benchmark, Version 2.1 (Language: C)\n");
  printf ("\n");
