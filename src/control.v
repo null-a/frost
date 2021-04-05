@@ -10,9 +10,9 @@ module control(input clk,
                output halt,
                output pc_enable,
                output pc_load,
-               output reg_re1,
-               output reg_re2,
+               output reg_re,
                output reg_we,
+               output reg_rs_sel,
                output reg alu_sel1,
                output reg alu_sel2,
                output reg [4:0] alu_op,
@@ -25,11 +25,12 @@ module control(input clk,
 
    `include "defs.inc"
 
-   localparam FETCH1 = 3'd0; // Load the instruction in RAM.
-   localparam FETCH2 = 3'd1; // Transfer to instruction register.
-   localparam DECODE = 3'd2;
-   localparam MEM    = 3'd3;
-   localparam EXEC   = 3'd4;
+   localparam FETCH1  = 3'd0; // Load the instruction in RAM.
+   localparam FETCH2  = 3'd1; // Transfer to instruction register.
+   localparam DECODE1 = 3'd2; // Load first reg
+   localparam DECODE2 = 3'd3; // Load second reg
+   localparam MEM     = 3'd4;
+   localparam EXEC    = 3'd5;
 
    reg [2:0] step;
 
@@ -39,7 +40,7 @@ module control(input clk,
 
    wire [2:0] next_step;
 
-   assign next_step = step == 4 ? 0 : step + 1;
+   assign next_step = step == 5 ? 0 : step + 1;
 
    always @(posedge clk) begin
       if (reset) begin
@@ -54,8 +55,9 @@ module control(input clk,
    assign pc_enable = step == EXEC && !halt;
    assign pc_load = step == EXEC && ((opcode == BRANCH && cmp_out) || opcode == JAL || opcode == JALR);
 
-   assign reg_re1 = step == DECODE;
-   assign reg_re2 = step == DECODE;
+   assign reg_re = (step == DECODE1) || (step == DECODE2);
+   assign reg_rs_sel = step == DECODE1;
+
    assign reg_we = step == EXEC && (opcode == OP_IMM || opcode == LUI || opcode == OP ||
                                     opcode == AUIPC || opcode == JAL || opcode == JALR ||
                                     opcode == LOAD);
@@ -74,11 +76,12 @@ module control(input clk,
 
    assign inst_load = step == FETCH2;
 
-   assign target_load = step == DECODE || (step == MEM && opcode == JALR);
+   assign target_load = step == DECODE2 || (step == MEM && opcode == JALR);
 
    always @(*) begin
       casez ({step, opcode})
-        {DECODE, 7'b?},
+        {DECODE1, 7'b?},
+        {DECODE2, 7'b?},
         {EXEC,   AUIPC}:
           begin
              alu_sel1 = 1; alu_sel2 = 1;

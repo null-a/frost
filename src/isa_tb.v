@@ -36,20 +36,20 @@ module isa_tb;
 
       // $dumpfile("isa.vcd");
       // $dumpvars(0, isa_tb);
-      // $dumpvars(1, cpu.reg_file.file1[0]);
-      // $dumpvars(1, cpu.reg_file.file1[1]);
-      // $dumpvars(1, cpu.reg_file.file1[2]);
-      // $dumpvars(1, cpu.reg_file.file1[3]);
-      // $dumpvars(1, cpu.reg_file.file1[4]);
-      // $dumpvars(1, cpu.reg_file.file1[28]);
-      // $dumpvars(1, cpu.reg_file.file1[31]);
+      // $dumpvars(1, cpu.reg_file.file[0]);
+      // $dumpvars(1, cpu.reg_file.file[1]);
+      // $dumpvars(1, cpu.reg_file.file[2]);
+      // $dumpvars(1, cpu.reg_file.file[3]);
+      // $dumpvars(1, cpu.reg_file.file[4]);
+      // $dumpvars(1, cpu.reg_file.file[28]);
+      // $dumpvars(1, cpu.reg_file.file[31]);
 
       wait (cpu.halt == 1 || cycle == 10_000) #20;
       $display("test=%6s cycle=%d, halt=%d, pc=%d, x28=%d, result=%s",
                `ISA_TEST,
                cycle, cpu.halt, cpu.pc,
-               cpu.reg_file.file1[28],
-               cpu.reg_file.file1[31] ==
+               cpu.reg_file.file[28],
+               cpu.reg_file.file[31] ==
                32'h55 ? "pass" :
                32'haa ? "fail" : "error");
       $finish;

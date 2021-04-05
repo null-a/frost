@@ -17,16 +17,17 @@ module cpu(input clk,
    wire [31:0] inst_reg_out;
    wire [31:0] wd;
    wire [6:0] opcode;
+   wire [4:0] ra;
    wire [4:0] rd;
    wire [4:0] rs1;
    wire [4:0] rs2;
+   wire reg_rs_sel;
    wire [2:0] funct3;
    wire [6:0] funct7;
    wire [31:0] imm;
    wire bit20;
    wire bit30;
-   wire reg_re1;
-   wire reg_re2;
+   wire reg_re;
    wire reg_we;
    wire [31:0] r1;
    wire [31:0] r2;
@@ -50,7 +51,7 @@ module cpu(input clk,
                    .cmp_out(alu_out[0]),
                    .halt(halt),
                    .pc_enable(pc_enable), .pc_load(pc_load),
-                   .reg_re1(reg_re1), .reg_re2(reg_re2), .reg_we(reg_we),
+                   .reg_re(reg_re), .reg_we(reg_we), .reg_rs_sel(reg_rs_sel),
                    .alu_sel1(alu_sel1), .alu_sel2(alu_sel2), .alu_op(alu_op),
                    .target_load(target_load), .wd_sel(wd_sel),
                    .mem_addr_sel(mem_addr_sel), .mem_read_op(mem_read_op), .mem_write_op(mem_write_op),
@@ -68,8 +69,10 @@ module cpu(input clk,
    mux4 wd_mux (.a(alu_out), .b(pc_plus_4), .c(32'b0), .d(rdata_internal),
                 .sel(wd_sel), .out(wd));
 
-   reg_file reg_file (.clk(clk), .ra1(rs1), .ra2(rs2), .wa(rd),
-                      .din(wd), .re1(reg_re1), .re2(reg_re2),
+   mux #(.WIDTH(5)) reg_rs_mux (.a(rs1), .b(rs2), .out(ra), .sel(reg_rs_sel));
+
+   reg_file reg_file (.clk(clk), .ra(ra), .wa(rd),
+                      .din(wd), .re(reg_re),
                       .we(reg_we), .dout1(r1), .dout2(r2));
 
    mux #(.WIDTH(32)) mem_addr_mux (.a(pc), .b(alu_out), .out(addr_internal), .sel(mem_addr_sel));
