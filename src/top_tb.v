@@ -21,8 +21,6 @@ module top_tb;
    wire tx_done_tick;
    wire [7:0] tx_fifo_out;
 
-   // TODO: Specifically load the expected (echo) firmware.
-
    top dut (.clk(clk), .reset(reset), .tx(tx), .rx(rx));
 
    // Capture the UART output directly from the buffer. This is easier
@@ -47,18 +45,12 @@ module top_tb;
       #200;
       reset = 0;
 
-      #sp;
-      #sp;
+      txchar("1");
+      txchar("2");
 
-      for (i=0; i<128; i=i+1) begin
-         txchar("0");
-      end
-
-      txchar("\n"); txchar("d"); txchar("o"); txchar("n"); txchar("e");
-      #800000;
-
-      // This is useful with programs that terminate.
-      // wait(dut.cpu.halt & dut.uart.tx_empty);
+      // This is useful with programs that terminate. Otherwise, a
+      // delay make more sense.
+      wait(dut.cpu.halt & dut.uart.tx_empty);
 
       $display("\n==========");
       $finish;
