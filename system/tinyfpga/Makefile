@@ -3,7 +3,7 @@
 .PHONY: all lint prog clean
 
 # Don't attempt to include test benches in main build.
-srcs = $(filter-out %_tb.v, $(wildcard *.v))
+srcs = $(filter-out %_tb.v, $(wildcard *.v ../*.v ../../src/*.v))
 
 all: fpga.bin
 
@@ -16,13 +16,6 @@ all: fpga.bin
 %.bin: %.asc
 	icepack $< $@
 
-# Don't include fpga.v/pll.v when running iverilog, since it doesn't
-# know where to find the PLL primitives.
-%_tb.vvp: %_tb.v $(filter-out fpga.v pll.v, $(srcs))
-	iverilog -DSIM -DRAM_SIZE_KB=14 -o $@ $^
-
-# I'm assuming that a test bench always makes a VCD file of similar
-# name.
 %.vcd: %_tb.vvp
 	vvp -n $<
 
