@@ -35,8 +35,15 @@ module ram
          ram[i] = 32'b0;
       end
       `endif
-      `ifndef ISA_TEST
-      $readmemh("firmware.hex", ram);
+      `ifdef FW
+      if (`FW != "") begin
+         $display("Loading firmware: %s", `FW);
+         $readmemh(`FW, ram);
+      end
+      else begin
+         $display("ERROR: No firmware specified");
+         $finish();
+      end
       `endif
    end
 

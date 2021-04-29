@@ -8,7 +8,7 @@ srcs = $(filter-out %_tb.v, $(wildcard *.v ../*.v ../../src/*.v))
 all: fpga.bin
 
 %.json: $(srcs)
-	yosys -p 'synth_ice40 -top $(basename $@) -json $@' $^
+	yosys -DFW=\"$(FW)\" -p 'synth_ice40 -top $(basename $@) -json $@' $^
 
 %.asc: %.json pins.pcf
 	nextpnr-ice40 --lp8k --package cm81 --freq 16 --json $< --pcf pins.pcf --asc $@
