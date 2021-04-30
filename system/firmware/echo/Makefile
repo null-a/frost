@@ -17,7 +17,7 @@ echo.bin: echo.elf
 	chmod -x $@
 
 echo.hex: echo.bin
-	python3 ../../src/bin2hex.py echo.bin > echo.hex
+	python3 ../bin2hex.py echo.bin > echo.hex
 
 echo.dump: echo.elf
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@

@@ -17,7 +17,7 @@ hello.bin: hello.elf
 	chmod -x $@
 
 hello.hex: hello.bin
-	python3 ../../src/bin2hex.py hello.bin > hello.hex
+	python3 ../bin2hex.py hello.bin > hello.hex
 
 hello.dump: hello.elf
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@
