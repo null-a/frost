@@ -1,1 +1,2 @@
-ls ../../riscv_simulator/tests/isa/*.bin | xargs -I{} basename {} .bin | xargs -I{} sh -c 'python3 ../src/bin2hex.py ../../riscv_simulator/tests/isa/$1.bin > $1.hex' -- {}
+ls ~/riscv-tests/isa/rv32ui/*.S | xargs -I '{}' basename '{}' | xargs -I '{}' cp ~/riscv-tests/isa/rv64ui/{} .
+sed 's/RVTEST_RV64U/RVTEST_RV32U/' -i *.S

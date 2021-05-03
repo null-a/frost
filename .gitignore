@@ -8,5 +8,5 @@ venv/
 *.vcd
 *.o
 *.elf
-*.hex
 *.dump
+system/**/*.hex
