@@ -91,12 +91,10 @@ module top (input clk,
    wire [31:0] ms_count;
    ms_counter ms_counter (.clk(clk), .out(ms_count));
 
-   // A 1 bit output register. Accessed via the low bit of memory
-   // address 0x400. (Low two bits of address lines are implicit,
-   // hence 0x100 below.)
-
+   // A general purpose 1-bit output register. Located at 0x10008 in
+   // the memory map. See blinky firmware for example of use.
    always @(posedge clk) begin
-      if (addr[8:0] == 9'b100000000 & &we) begin
+      if (addr == 30'h4002 & &we) begin
          out <= wdata[0];
       end
    end
