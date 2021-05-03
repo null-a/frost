@@ -16,7 +16,7 @@ all: $(targets)
 	chmod -x $@
 
 %.hex: %.bin
-	python3 ../system/firmware/bin2hex.py $< > $@
+	python3 ../src/bin2hex.py $< > $@
 
 %.dump: %.elf
 	riscv32-unknown-elf-objdump -d $< > $@

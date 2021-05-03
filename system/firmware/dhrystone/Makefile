@@ -23,7 +23,7 @@ dhry.elf: crt0.o stdlib.o dhry_1.o dhry_2.o
 	chmod -x $@
 
 %.hex: %.bin
-	python3 ../bin2hex.py $< > $@
+	python3 ../../../src/bin2hex.py $< > $@
 
 %.dump: %.elf
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@
