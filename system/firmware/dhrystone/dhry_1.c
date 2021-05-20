@@ -279,8 +279,8 @@ main ()
  /* Microseconds = (float) User_Time * Mic_secs_Per_Second */
  /* / (float) Number_Of_Runs; */
  /* Dhrystones_Per_Second = (float) Number_Of_Runs / (float) User_Time; */
- Microseconds = (User_Time * 1000) / Number_Of_Runs;
- Dhrystones_Per_Second = (1000 * Number_Of_Runs) / User_Time;
+ Microseconds = User_Time / Number_Of_Runs;
+ Dhrystones_Per_Second = (1000000 * Number_Of_Runs) / User_Time;
 #else
  Microseconds = (float) User_Time * Mic_secs_Per_Second
  / ((float) HZ * ((float) Number_Of_Runs));
