@@ -29,7 +29,7 @@ endif
 	vvp -n $<
 
 lint:
-	$(VERILATOR) -lint-only $(srcs)
+	$(VERILATOR) -I../../src -lint-only $(srcs)
 
 # h/t:
 # https://github.com/verilator/verilator/blob/master/examples/make_hello_c/Makefile
