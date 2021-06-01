@@ -21,8 +21,7 @@ module top (input clk,
             .addr(addr), .wdata(wdata), .rdata(rdata),
             .re(re), .we(we));
 
-   localparam RAM_SIZE_KB = `ifdef RAM_SIZE_KB `RAM_SIZE_KB `else 14 `endif;
-   localparam NUM_WORDS = RAM_SIZE_KB * 1024 / 4;
+   localparam NUM_WORDS = 14 * 1024 / 4;
 
    assign ram_en = addr < NUM_WORDS;
 
@@ -31,27 +30,27 @@ module top (input clk,
                                      .re(ram_en & re), .we(ram_en ? we : 4'b0));
 
 
-   // We need to multiple the appropriate data source onto `rdata` the
-   // cycle *after* the `re` tick. (Since there's an output register
-   // on RAM.) We need to remember sufficient information about the
-   // read address to facilitate this. We need to distinguish between
-   // RAM and any of the registers.
-
-   // TODO: Is this really necessary? Maybe it is already the case
-   // that the read address continues to be available during the cycle
-   // after the `re` tick. And if not, perhaps it's easy to arrange
-   // for this to be so?
+   // We need to multiplex the appropriate data source onto `rdata`
+   // the cycle *after* the `re` tick. (This is how the RAM works
+   // because of its output register, and the CPU is designed around
+   // it.) To facilitate this, we remember that state of `ram_en` for
+   // one cycle.
 
    reg ram_en_prev = 0;
    always @(posedge clk) begin
       ram_en_prev <= ram_en;
    end
 
-   // Remember the low bits of the address to distinguish between
-   // registers. (This approach will result in the registers been
-   // mirrored across the whole address space above RAM.)
-   reg [1:0] addr_prev = 2'b0;
+   // We also need to remember sufficient information about the read
+   // address.
 
+   // If we aren't doing a read from RAM, we multiplex the appropriate
+   // register onto the `rdata` bus, regardless of whether we're doing
+   // a read. We remember the low bits of the address to distinguish
+   // between registers. (This approach will result in the registers
+   // been mirrored across the whole address space above RAM.)
+
+   reg [1:0] addr_prev = 2'b0;
    always @(posedge clk) begin
       addr_prev <= addr[1:0];
    end

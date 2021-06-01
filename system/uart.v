@@ -8,8 +8,7 @@ module uart
    (input clk, reset, rd_uart, wr_uart, rx,
     input [7:0] w_data,
     output tx_full, rx_empty, tx,
-    output [7:0] r_data,
-    output [7:0] debug
+    output [7:0] r_data
     );
 
    wire tick, rx_done_tick, tx_done_tick;
