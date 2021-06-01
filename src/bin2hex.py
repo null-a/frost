@@ -14,11 +14,6 @@ def main(filename):
 
     data = grouper(data, ALIGN, 0)
 
-    # Indicate start address to `readmemh`. Note, this suppresses the
-    # warning in iverilog about the contents of the file not filling a
-    # memory.
-    print('@0')
-
     for (b0, b1, b2, b3) in data:
         print('{:02x}{:02x}{:02x}{:02x}'.format(b3, b2, b1, b0))
 
