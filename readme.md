@@ -20,7 +20,8 @@ my [homepage](https://paulhorsfall.co.uk/).
 * The base RV32I module is implemented. The
   corresponding [riscv-tests](https://github.com/riscv/riscv-tests/)
   pass.
-* All instructions take 6 cycles to execute. There is no pipelining.
+* Instructions take between 3 and 6 cycles to execute. There is no
+  pipelining.
 * Unaligned memory reads are not supported. They don't trap either, so
   there's no way to handle them in software.
 * The memory interface is very basic. It's suitable for cases where
