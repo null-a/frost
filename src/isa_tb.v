@@ -45,7 +45,7 @@ module isa_tb;
       // $dumpvars(1, cpu.reg_file.file[31]);
 
       wait (cpu.halt == 1 || cycle == 10_000) #20;
-      $display("test=%6s cycle=%d, halt=%d, pc=%d, x28=%d, result=%s",
+      $display("test=%7s cycle=%d, halt=%d, pc=%d, x28=%d, result=%s",
                `ISA_TEST,
                cycle, cpu.halt, cpu.pc,
                cpu.reg_file.file[28],

@@ -82,33 +82,34 @@ module control(input clk,
    // are available from STATE2 and later.
    always @(*) begin
       casez ({state, opcode})
-        {STATE0,         ANY}:    next_state = STATE1;
-        {STATE1,         ANY}:    next_state = STATE2;
-        {STATE2,         OP_IMM}: next_state = ALU_OP_IMM;
-        {STATE2,         OP}:     next_state = FETCH_REG;
-        {STATE2,         LUI}:    next_state = ALU_R1_ADD_IMM;
-        {STATE2,         AUIPC}:  next_state = ALU_TO_RF;
-        {STATE2,         BRANCH}: next_state = FETCH_REG;
-        {STATE2,         JAL}:    next_state = STATE0;
-        {STATE2,         JALR}:   next_state = JALR_ALU;
-        {STATE2,         LOAD}:   next_state = ALU_R1_ADD_IMM;
-        {STATE2,         STORE}:  next_state = FETCH_REG;
-        {STATE2,         SYSTEM}: next_state = state; // Assuming `ebreak`.
-        {FETCH_REG,      BRANCH}: next_state = COND_BRANCH;
-        {FETCH_REG,      OP}:     next_state = ALU_OP;
-        {FETCH_REG,      STORE}:  next_state = ALU_R1_ADD_IMM;
-        {ALU_OP_IMM,     ANY}:    next_state = ALU_TO_RF;
-        {ALU_OP,         ANY}:    next_state = ALU_TO_RF;
-        {ALU_R1_ADD_IMM, LUI}:    next_state = ALU_TO_RF;
-        {ALU_R1_ADD_IMM, LOAD}:   next_state = MEM_READ;
-        {ALU_R1_ADD_IMM, STORE}:  next_state = MEM_WRITE;
-        {ALU_TO_RF,      ANY}:    next_state = STATE0;
-        {COND_BRANCH,    ANY}:    next_state = STATE0;
-        {JALR_ALU,       ANY}:    next_state = STATE0;
-        {MEM_READ,       ANY}:    next_state = MEM_TO_RF;
-        {MEM_WRITE,      ANY}:    next_state = STATE0;
-        {MEM_TO_RF,      ANY}:    next_state = STATE0;
-        default:                  next_state = state;
+        {STATE0,         ANY}:      next_state = STATE1;
+        {STATE1,         ANY}:      next_state = STATE2;
+        {STATE2,         OP_IMM}:   next_state = ALU_OP_IMM;
+        {STATE2,         OP}:       next_state = FETCH_REG;
+        {STATE2,         LUI}:      next_state = ALU_R1_ADD_IMM;
+        {STATE2,         AUIPC}:    next_state = ALU_TO_RF;
+        {STATE2,         BRANCH}:   next_state = FETCH_REG;
+        {STATE2,         JAL}:      next_state = STATE0;
+        {STATE2,         JALR}:     next_state = JALR_ALU;
+        {STATE2,         LOAD}:     next_state = ALU_R1_ADD_IMM;
+        {STATE2,         STORE}:    next_state = FETCH_REG;
+        {STATE2,         MISC_MEM}: next_state = STATE0;
+        {STATE2,         SYSTEM}:   next_state = state; // Assuming `ebreak`.
+        {FETCH_REG,      BRANCH}:   next_state = COND_BRANCH;
+        {FETCH_REG,      OP}:       next_state = ALU_OP;
+        {FETCH_REG,      STORE}:    next_state = ALU_R1_ADD_IMM;
+        {ALU_OP_IMM,     ANY}:      next_state = ALU_TO_RF;
+        {ALU_OP,         ANY}:      next_state = ALU_TO_RF;
+        {ALU_R1_ADD_IMM, LUI}:      next_state = ALU_TO_RF;
+        {ALU_R1_ADD_IMM, LOAD}:     next_state = MEM_READ;
+        {ALU_R1_ADD_IMM, STORE}:    next_state = MEM_WRITE;
+        {ALU_TO_RF,      ANY}:      next_state = STATE0;
+        {COND_BRANCH,    ANY}:      next_state = STATE0;
+        {JALR_ALU,       ANY}:      next_state = STATE0;
+        {MEM_READ,       ANY}:      next_state = MEM_TO_RF;
+        {MEM_WRITE,      ANY}:      next_state = STATE0;
+        {MEM_TO_RF,      ANY}:      next_state = STATE0;
+        default:                    next_state = state;
       endcase
    end
 
@@ -241,6 +242,11 @@ module control(input clk,
          // Load r2
          reg_re = 1;
          reg_rs_sel = 1; // rs2
+      end
+      else if (state == STATE2 & opcode == MISC_MEM) begin
+         // Store incremented PC
+         next_pc_sel = 1;
+         pc_load = 1;
       end
       else if (state == STATE2 & opcode == SYSTEM) begin
          // Assuming `ebreak`
