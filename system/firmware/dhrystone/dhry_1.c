@@ -287,6 +287,7 @@ main ()
  Dhrystones_Per_Second = ((float) HZ * (float) Number_Of_Runs)
  / (float) User_Time;
 #endif
+ printf ("Elapsed time: %d microseconds\n", User_Time);
  printf ("Microseconds for one run through Dhrystone: ");
  printf ("%d\n", Microseconds);
  printf ("Dhrystones per Second: ");
