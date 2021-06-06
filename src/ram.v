@@ -9,14 +9,12 @@ module ram
     input [3:0] we,
     output reg [31:0] dout);
 
-   // Specifying an initial value as below prevent yosys inferring a
-   // BRAM. This is a known issue:
+   // Avoid defining an initial value for the output register, as
+   // doing so prevents yosys inferring a BRAM. (Is defining the
+   // register internally and using an output wire a workaround?)
    //
    // https://github.com/YosysHQ/yosys/issues/1088
    //
-   // Defining the register internally and using an output wire
-   // (rather than reg) might be a workaround.
-
    // initial begin
    //    dout = 0;
    // end
