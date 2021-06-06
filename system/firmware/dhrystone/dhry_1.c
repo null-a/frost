@@ -127,7 +127,11 @@ main ()
  /* { */
  /* int n; */
  /* scanf ("%d", &n); */
+
+ /* Note that the computation of Dhrystones_Per_Second will overflow
+    when Number_Of_Runs is greater than about 2000. */
  Number_Of_Runs = 1000;
+
  /* } */
  /* printf ("\n"); */
 
