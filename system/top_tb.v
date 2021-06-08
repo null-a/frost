@@ -33,7 +33,7 @@ module top_tb;
       end
    end
 
-   localparam sp = 52083.33; // serial period
+   localparam sp = 4000; // serial period (1/baud rate * 1e9)
    integer i;
 
    initial begin
