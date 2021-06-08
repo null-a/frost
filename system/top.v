@@ -29,7 +29,7 @@ module top (input clk,
 
    localparam NUM_WORDS = 14 * 1024 / 4;
 
-   assign ram_en = addr < NUM_WORDS;
+   assign ram_en = ~addr[14];
 
    ram #(.NUM_WORDS(NUM_WORDS)) ram (.clk(clk), .addr(addr),
                                      .din(wdata), .dout(ram_rdata),
