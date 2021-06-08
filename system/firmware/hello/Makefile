@@ -23,4 +23,4 @@ hello.dump: hello.elf
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@
 
 clean:
-	rm -f crt0.o hello.o hello.elf hello.bin fw.hex hello.dump
+	rm -f crt0.o hello.o hello.elf hello.bin fw.hex dummy.hex hello.dump
