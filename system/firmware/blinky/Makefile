@@ -22,4 +22,4 @@ blinky.dump: blinky.elf
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@
 
 clean:
-	rm -f crt0.o blinky.o blinky.elf blinky.bin fw.hex dummy.hex blinky.dump
+	rm -f crt0.o blinky.o blinky.elf blinky.bin fw.hex blinky.dump

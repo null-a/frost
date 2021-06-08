@@ -25,4 +25,4 @@ spi.dump: spi.elf
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@
 
 clean:
-	rm -f crt0.o spi.o spi.elf spi.bin fw.hex dummy.hex spi.dump
+	rm -f crt0.o spi.o spi.elf spi.bin fw.hex spi.dump

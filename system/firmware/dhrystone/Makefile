@@ -29,4 +29,4 @@ fw.hex: dhry.bin
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@
 
 clean:
-	rm -f crt0.o stdlib.o dhry_1.o dhry_2.o dhry.elf dhry.bin fw.hex dummy.hex dhry.dump
+	rm -f crt0.o stdlib.o dhry_1.o dhry_2.o dhry.elf dhry.bin fw.hex dhry.dump

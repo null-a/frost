@@ -23,4 +23,4 @@ echo.dump: echo.elf
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@
 
 clean:
-	rm -f crt0.o echo.o echo.elf echo.bin fw.hex dummy.hex echo.dump
+	rm -f crt0.o echo.o echo.elf echo.bin fw.hex echo.dump
