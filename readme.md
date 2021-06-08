@@ -41,7 +41,7 @@ required to run the tests.
 
 An example of a simple system built around the CPU. It consists of the
 CPU plus RAM, UART and a timer. The system can be simulated by running
-e.g. `FW=firmware/hello/hello.hex make` from this
+e.g. `FW=hello make` from this
 directory. [Icarus Verilog](http://iverilog.icarus.com/) is required
 to run the simulation.
 
@@ -61,8 +61,8 @@ requires
 [nextpnr](https://github.com/YosysHQ/nextpnr) and
 the [IceStorm](https://github.com/YosysHQ/icestorm) tools for
 synthesis, and [tinyprog](https://pypi.org/project/tinyprog/) for
-programming the board. Use e.g. `FW=../firmware/hello/hello.hex make`
-to run synthesis with a particular firmware.
+programming the board. Use e.g. `FW=hello make` to run synthesis with
+a particular firmware.
 
 ### [`tests`](./tests)
 

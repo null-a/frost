@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-all: dhry.hex dhry.dump
+all: fw.hex dhry.dump
 
 crt0.o: crt0.S
 	riscv32-unknown-elf-gcc -c $<
@@ -22,11 +22,11 @@ dhry.elf: crt0.o stdlib.o dhry_1.o dhry_2.o
 	riscv32-unknown-elf-objcopy -O binary $< $@
 	chmod -x $@
 
-%.hex: %.bin
+fw.hex: dhry.bin
 	python3 ../../../src/bin2hex.py $< > $@
 
 %.dump: %.elf
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@
 
 clean:
-	rm -f crt0.o stdlib.o dhry_1.o dhry_2.o dhry.elf dhry.bin dhry.hex dhry.dump
+	rm -f crt0.o stdlib.o dhry_1.o dhry_2.o dhry.elf dhry.bin fw.hex dhry.dump

@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-all: blinky.hex blinky.dump
+all: fw.hex blinky.dump
 
 crt0.o: crt0.S
 	riscv32-unknown-elf-gcc -c $<
@@ -15,11 +15,11 @@ blinky.bin: blinky.elf
 	riscv32-unknown-elf-objcopy -O binary $< $@
 	chmod -x $@
 
-blinky.hex: blinky.bin
-	python3 ../../../src/bin2hex.py blinky.bin > blinky.hex
+fw.hex: blinky.bin
+	python3 ../../../src/bin2hex.py blinky.bin > fw.hex
 
 blinky.dump: blinky.elf
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@
 
 clean:
-	rm -f crt0.o blinky.o blinky.elf blinky.bin blinky.hex blinky.dump
+	rm -f crt0.o blinky.o blinky.elf blinky.bin fw.hex blinky.dump

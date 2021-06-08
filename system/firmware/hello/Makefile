@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-all: hello.hex hello.dump
+all: fw.hex hello.dump
 
 crt0.o: crt0.S
 	riscv32-unknown-elf-gcc -c $<
@@ -16,11 +16,11 @@ hello.bin: hello.elf
 	riscv32-unknown-elf-objcopy -O binary $< $@
 	chmod -x $@
 
-hello.hex: hello.bin
-	python3 ../../../src/bin2hex.py hello.bin > hello.hex
+fw.hex: hello.bin
+	python3 ../../../src/bin2hex.py hello.bin > fw.hex
 
 hello.dump: hello.elf
 	riscv32-unknown-elf-objdump -D -Mnumeric $< > $@
 
 clean:
-	rm -f crt0.o hello.o hello.elf hello.bin hello.hex hello.dump
+	rm -f crt0.o hello.o hello.elf hello.bin fw.hex hello.dump
