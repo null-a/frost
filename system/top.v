@@ -2,9 +2,15 @@
 
 module top (input clk,
             input reset,
+            output reg led,
             input rx,
             output tx,
-            output reg out);
+            // GPIO
+            input in0,
+            inout out0, // `inout` to allow high impedance
+            inout out1,
+            inout out2,
+            inout out3);
 
    wire re;
    wire [3:0] we;
@@ -71,10 +77,20 @@ module top (input clk,
       rd_uart_prev <= rd_uart;
    end
 
+
+   reg in0_reg0;
+   reg in0_reg1;
+
+   always @(posedge clk) begin
+      in0_reg0 <= in0;
+      in0_reg1 <= in0_reg0;
+   end
+
    assign rdata = ram_en_prev        ? ram_rdata :
                   addr_prev == 2'b00 ? {31'b0, tx_full} :
                   addr_prev == 2'b01 ? {23'b0, rx_empty, uart_rdata} :
-                  /* otherwise */      ms_count;
+                  addr_prev == 2'b10 ? ms_count :
+                  /* otherwise */      {31'b0, in0_reg1};
 
    wire rx_empty;
    wire tx_full;
@@ -90,11 +106,40 @@ module top (input clk,
    wire [31:0] ms_count;
    ms_counter ms_counter (.clk(clk), .out(ms_count));
 
-   // A general purpose 1-bit output register. Located at 0x10008 in
-   // the memory map. See blinky firmware for example of use.
+
+   // GPIO. Mapped at 0x10008, 0x1000C, 0x10010, 0x10014, 0x10018.
+   // See blinky firmware for example of use.
+
+   // Outputs are tri-state. Writing 0 or 1 sets the output low or
+   // high respectively. Writing a 2 puts the output in a
+   // high-impedance state. Outputs default to the high impedance
+   // state.
+
+   reg [1:0] reg_out0 = 2'b10;
+   reg [1:0] reg_out1 = 2'b10;
+   reg [1:0] reg_out2 = 2'b10;
+   reg [1:0] reg_out3 = 2'b10;
+
+   assign out0 = reg_out0[1] ? 1'bz : reg_out0[0];
+   assign out1 = reg_out1[1] ? 1'bz : reg_out1[0];
+   assign out2 = reg_out2[1] ? 1'bz : reg_out2[0];
+   assign out3 = reg_out3[1] ? 1'bz : reg_out3[0];
+
    always @(posedge clk) begin
       if (addr == 30'h4002 & &we) begin
-         out <= wdata[0];
+         led <= wdata[0];
+      end
+      if (addr == 30'h4003 & &we) begin
+         reg_out0 <= wdata[1:0];
+      end
+      if (addr == 30'h4004 & &we) begin
+         reg_out1 <= wdata[1:0];
+      end
+      if (addr == 30'h4005 & &we) begin
+         reg_out2 <= wdata[1:0];
+      end
+      if (addr == 30'h4006 & &we) begin
+         reg_out3 <= wdata[1:0];
       end
    end
 

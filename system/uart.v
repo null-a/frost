@@ -17,8 +17,8 @@ module uart
 
    assign tx_fifo_not_empty = ~tx_empty;
 
-   // Given the 16 MHz clock, this gives a baud rate of 19200.
-   mod_m_counter #(.M(52), .N(6)) baud_gen_unit
+   // Given the 16 MHz clock, this gives a baud rate of 250000.
+   mod_m_counter #(.M(4), .N(2)) baud_gen_unit
      (.clk(clk), .reset(reset), .max_tick(tick));
 
    uart_rx uart_rx_unit
