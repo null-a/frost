@@ -23,34 +23,6 @@ module control(input clk,
                output reg alu_reg_load,
                output reg next_pc_sel);
 
-   // Opportunities to optimise:
-
-   // LUI
-   // ===
-   //
-   // This is executed in a round about way. I do something like:
-   //
-   //   r1 <= x0 (This relies on a special case in `decode.v`.)
-   //   alu_reg <= r1 + imm
-   //   regfile[rd] <= alu_reg
-   //
-   // If I had an ALU op that passed through the `a` input unmodified,
-   // I could use it here and dispense with the load of `x0`, saving a
-   // cycle.
-   //
-   // More extreme, would be to wire `imm` directly to the mux in
-   // front of the regfile `wd` input. This could potentially save two
-   // cycles. As well as the cost of the wider mux, I'd need to check
-   // this didn't lengthen the critical path. (It may not.)
-   //
-   // STORE
-   // ====
-   //
-   // I think I could save a cycle by performing the load of r2 and
-   // `alu_reg <= r1 + imm` in parallel. I don't do that at present
-   // because the change entails loading r1 before r2, but the
-   // register file interface forces r2 to be loaded before r1.
-
    `include "defs.inc"
 
    localparam STATE0         = 4'd0;
