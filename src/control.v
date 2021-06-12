@@ -97,6 +97,9 @@ module control(input clk,
       // Maybe not as of 2018:
       // https://github.com/YosysHQ/yosys/issues/765#issuecomment-466400999
       //
+      // Perhaps also follow:
+      // https://github.com/YosysHQ/yosys/issues/2813
+      //
       halt = 0;
       pc_load = 0;
       reg_re = 0;
