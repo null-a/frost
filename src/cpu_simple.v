@@ -1,7 +1,7 @@
 `default_nettype none
 
 // This module wraps `cpu`, simplifying its memory interface. This
-// interface required that connected memory devices are (32 bit) word
+// interface requires that connected memory devices are (32 bit) word
 // addressable, and that per-byte write enable is supported. Note that
 // when using this interface, the CPU will not be able to perform
 // unaligned operations.
