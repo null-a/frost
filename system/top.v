@@ -35,33 +35,6 @@ module top (input clk,
                                      .din(wdata), .dout(ram_rdata),
                                      .re(ram_en & re), .we(ram_en ? we : 4'b0));
 
-
-   // We need to multiplex the appropriate data source onto `rdata`
-   // the cycle *after* the `re` tick. (This is how the RAM works
-   // because of its output register, and the CPU is designed around
-   // it.) To facilitate this, we remember that state of `ram_en` for
-   // one cycle.
-
-   reg ram_en_prev = 0;
-   always @(posedge clk) begin
-      ram_en_prev <= ram_en;
-   end
-
-   // We also need to remember sufficient information about the read
-   // address.
-
-   // If we aren't doing a read from RAM, we multiplex the appropriate
-   // register onto the `rdata` bus, regardless of whether we're doing
-   // a read. We remember the low bits of the address to distinguish
-   // between registers. (This approach will result in the registers
-   // been mirrored across the whole address space above RAM.)
-
-   reg [1:0] addr_prev = 2'b0;
-   always @(posedge clk) begin
-      addr_prev <= addr[1:0];
-   end
-
-
    wire rd_uart;
    wire wr_uart;
    // Write port available at 0x10000 (tx). (Can also be read to check
@@ -86,10 +59,10 @@ module top (input clk,
       in0_reg1 <= in0_reg0;
    end
 
-   assign rdata = ram_en_prev        ? ram_rdata :
-                  addr_prev == 2'b00 ? {31'b0, tx_full} :
-                  addr_prev == 2'b01 ? {23'b0, rx_empty, uart_rdata} :
-                  addr_prev == 2'b10 ? ms_count :
+   assign rdata = ram_en             ? ram_rdata :
+                  addr[1:0] == 2'b00 ? {31'b0, tx_full} :
+                  addr[1:0] == 2'b01 ? {23'b0, rx_empty, uart_rdata} :
+                  addr[1:0] == 2'b10 ? ms_count :
                   /* otherwise */      {31'b0, in0_reg1};
 
    wire rx_empty;
