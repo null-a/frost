@@ -2,12 +2,13 @@
 
 module cpu(input clk,
            input reset,
-           input mem_ready,
+           input mem_ready, // signals that data is ready to be read
+           output mem_init, // strobe, initiating a memory ready
+           output [2:0] mem_read_op,
+           output [1:0] mem_write_op,
            input [31:0] rdata,
            output [31:0] wdata,
-           output [29:0] addr,
-           output re,
-           output [3:0] we);
+           output [31:0] addr);
 
    wire halt;
    wire pc_load;
@@ -39,14 +40,12 @@ module cpu(input clk,
    wire reg_wd_sel;
    wire inst_load;
    wire mem_addr_sel;
-   wire [2:0] mem_read_op;
-   wire [1:0] mem_write_op;
-   wire [31:0] rdata_internal;
-   wire [31:0] addr_internal;
    wire alu_reg_load;
    wire [31:0] alu_reg_out;
    wire next_pc_sel;
    wire [31:0] next_pc;
+
+   assign wdata = r2;
 
    control control(.clk(clk), .reset(reset), .opcode(opcode), .funct3(funct3), .bit20(bit20), .bit30(bit30),
                    .cmp_out(alu_out[0]),
@@ -58,19 +57,13 @@ module cpu(input clk,
                    .next_pc_sel(next_pc_sel),
                    .reg_wd_sel(reg_wd_sel),
                    .mem_addr_sel(mem_addr_sel), .mem_read_op(mem_read_op), .mem_write_op(mem_write_op),
-                   .inst_load(inst_load), .mem_ready(mem_ready), .mem_init(re));
-
-   mem mem (.clk(clk), .read_op(mem_read_op), .write_op(mem_write_op),
-            .we(we),
-            .rdata_in(rdata), .rdata_out(rdata_internal),
-            .wdata_in(r2), .wdata_out(wdata),
-            .addr_in(addr_internal), .addr_out(addr));
+                   .inst_load(inst_load), .mem_ready(mem_ready), .mem_init(mem_init));
 
    mux next_pc_mux (.a(alu_out), .b(alu_reg_out), .sel(next_pc_sel), .out(next_pc));
 
    register program_counter(.clk(clk), .din(next_pc), .dout(pc), .en(pc_load));
 
-   mux reg_wd_mux (.a(alu_reg_out), .b(rdata_internal), .sel(reg_wd_sel), .out(wd));
+   mux reg_wd_mux (.a(alu_reg_out), .b(rdata), .sel(reg_wd_sel), .out(wd));
 
    mux #(.WIDTH(5)) reg_rs_mux (.a(rs1), .b(rs2), .out(ra), .sel(reg_rs_sel));
 
@@ -78,9 +71,9 @@ module cpu(input clk,
                       .din(wd), .re(reg_re),
                       .we(reg_we), .dout1(r1), .dout2(r2));
 
-   mux #(.WIDTH(32)) mem_addr_mux (.a(pc), .b(alu_reg_out), .out(addr_internal), .sel(mem_addr_sel));
+   mux #(.WIDTH(32)) mem_addr_mux (.a(pc), .b(alu_reg_out), .out(addr), .sel(mem_addr_sel));
 
-   register inst_reg (.clk(clk), .din(rdata_internal), .dout(inst), .en(inst_load));
+   register inst_reg (.clk(clk), .din(rdata), .dout(inst), .en(inst_load));
 
    decode decode (.inst(inst), .opcode(opcode),
                   .rd(rd), .rs1(rs1), .rs2(rs2),

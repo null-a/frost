@@ -23,9 +23,9 @@ module isa_tb;
    wire re;
    wire [3:0] we;
 
-   cpu cpu (.clk(clk), .reset(1'b0),
-            .addr(addr), .wdata(wdata), .rdata(rdata),
-            .re(re), .we(we), .mem_ready(1'b1));
+   cpu_simple cpu (.clk(clk), .reset(1'b0),
+                   .addr(addr), .wdata(wdata), .rdata(rdata),
+                   .re(re), .we(we), .mem_ready(1'b1));
 
    ram #(.NUM_WORDS(2048)) ram (.clk(clk), .addr(addr),
                                 .din(wdata), .dout(rdata),
@@ -44,12 +44,12 @@ module isa_tb;
       // $dumpvars(1, cpu.reg_file.file[28]);
       // $dumpvars(1, cpu.reg_file.file[31]);
 
-      wait (cpu.halt == 1 || cycle == 10_000) #20;
+      wait (cpu.cpu.halt == 1 || cycle == 10_000) #20;
       $display("test=%7s cycle=%d, halt=%d, pc=%d, x28=%d, result=%s",
                `ISA_TEST,
-               cycle, cpu.halt, cpu.pc,
-               cpu.reg_file.file[28],
-               cpu.reg_file.file[31] ==
+               cycle, cpu.cpu.halt, cpu.cpu.pc,
+               cpu.cpu.reg_file.file[28],
+               cpu.cpu.reg_file.file[31] ==
                32'h55 ? "pass" :
                32'haa ? "fail" : "error");
       $finish;

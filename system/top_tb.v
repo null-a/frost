@@ -50,7 +50,7 @@ module top_tb;
 
       // This is useful with programs that terminate. Otherwise, a
       // delay make more sense.
-      wait(dut.cpu.halt & dut.uart.tx_empty);
+      wait(dut.cpu.cpu.halt & dut.uart.tx_empty);
 
       $display("\n==========");
       $finish;
