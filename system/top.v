@@ -25,7 +25,7 @@ module top (input clk,
 
    cpu cpu (.clk(clk), .reset(reset),
             .addr(addr), .wdata(wdata), .rdata(rdata),
-            .re(re), .we(we));
+            .re(re), .we(we), .mem_ready(1'b1));
 
    localparam NUM_WORDS = 14 * 1024 / 4;
 

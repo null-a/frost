@@ -3,7 +3,6 @@
 module mem(input clk,
            input [2:0] read_op,
            input [1:0] write_op,
-           output re,
            output reg [3:0] we,
            input [31:0] rdata_in,
            input [31:0] wdata_in,
@@ -30,8 +29,6 @@ module mem(input clk,
    assign {rb3, rb2, rb1, rb0} = rdata_in;
    assign {wb3, wb2, wb1, wb0} = wdata_in;
 
-   assign re = read_op != LNONE;
-
    always @(*) begin
       case ({write_op, addr_lo})
         {SB, 2'd0}: begin we = 4'b0001; wdata_out = {24'b0, wb0};       end
@@ -45,16 +42,8 @@ module mem(input clk,
       endcase // case ({write_op, addr_in[1:0]})
    end // always @ (*)
 
-   reg [2:0] read_op_reg;
-   reg [1:0] addr_lo_reg;
-
-   always @(posedge clk) begin
-      read_op_reg <= read_op;
-      addr_lo_reg <= addr_lo;
-   end
-
    always @(*) begin
-      casez ({read_op_reg, addr_lo_reg})
+      casez ({read_op, addr_lo})
         {LB, 2'd0}:  rdata_out = {{24{rb0[7]}}, rb0};
         {LB, 2'd1}:  rdata_out = {{24{rb1[7]}}, rb1};
         {LB, 2'd2}:  rdata_out = {{24{rb2[7]}}, rb2};
@@ -69,7 +58,7 @@ module mem(input clk,
         {LHU, 2'd2}: rdata_out = {16'b0, rb3, rb2};
         {LW, 2'b?}: rdata_out = rdata_in;
         default:    rdata_out = 32'bx;
-      endcase // casez ({read_op_reg, addr_lo_reg})
+      endcase // casez ({read_op, addr_lo})
    end // always @ (*)
 
 endmodule // mem

@@ -2,6 +2,7 @@
 
 module cpu(input clk,
            input reset,
+           input mem_ready,
            input [31:0] rdata,
            output [31:0] wdata,
            output [29:0] addr,
@@ -57,10 +58,10 @@ module cpu(input clk,
                    .next_pc_sel(next_pc_sel),
                    .reg_wd_sel(reg_wd_sel),
                    .mem_addr_sel(mem_addr_sel), .mem_read_op(mem_read_op), .mem_write_op(mem_write_op),
-                   .inst_load(inst_load));
+                   .inst_load(inst_load), .mem_ready(mem_ready), .mem_init(re));
 
    mem mem (.clk(clk), .read_op(mem_read_op), .write_op(mem_write_op),
-            .re(re), .we(we),
+            .we(we),
             .rdata_in(rdata), .rdata_out(rdata_internal),
             .wdata_in(r2), .wdata_out(wdata),
             .addr_in(addr_internal), .addr_out(addr));

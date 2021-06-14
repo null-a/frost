@@ -25,7 +25,7 @@ module isa_tb;
 
    cpu cpu (.clk(clk), .reset(1'b0),
             .addr(addr), .wdata(wdata), .rdata(rdata),
-            .re(re), .we(we));
+            .re(re), .we(we), .mem_ready(1'b1));
 
    ram #(.NUM_WORDS(2048)) ram (.clk(clk), .addr(addr),
                                 .din(wdata), .dout(rdata),
