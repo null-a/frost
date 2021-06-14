@@ -61,8 +61,9 @@ requires
 [nextpnr](https://github.com/YosysHQ/nextpnr) and
 the [IceStorm](https://github.com/YosysHQ/icestorm) tools for
 synthesis, and [tinyprog](https://pypi.org/project/tinyprog/) for
-programming the board. Use `FW=<firmware> make` to run synthesis with
-a particular firmware.
+programming the board. Use `FW=<firmware> make prog` to run synthesis
+with a particular firmware and program the FPGA with the resulting
+bitstream.
 
 ### [`tests`](./tests)
 
