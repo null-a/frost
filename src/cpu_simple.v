@@ -27,8 +27,7 @@ module cpu_simple(input clk,
             .rdata(rdata_internal), .wdata(wdata_internal),
             .addr(addr_internal));
 
-   mem mem (.clk(clk),
-            .read_op(mem_read_op), .write_op(mem_write_op),
+   mem mem (.read_op(mem_read_op), .write_op(mem_write_op),
             .we(we),
             .rdata_in(rdata), .rdata_out(rdata_internal),
             .wdata_in(wdata_internal), .wdata_out(wdata),

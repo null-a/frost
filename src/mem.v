@@ -1,7 +1,6 @@
 `default_nettype none
 
-module mem(input clk,
-           input [2:0] read_op,
+module mem(input [2:0] read_op,
            input [1:0] write_op,
            output reg [3:0] we,
            input [31:0] rdata_in,
