@@ -10,3 +10,6 @@ venv/
 *.elf
 *.dump
 system/**/*.hex
+docs/*.aux
+docs/*.log
+docs/*.pdf

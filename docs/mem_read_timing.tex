@@ -1,0 +1,25 @@
+\documentclass{standalone}
+\usepackage{tikz-timing}
+\begin{document}
+\begin{tikztimingtable}[
+    timing/.style={x=5ex,y=2ex},
+    x=5ex,
+    timing/rowdist=3ex,
+    timing/coldist=0ex,
+    timing/name/.style={font=\ttfamily\scriptsize},
+    timing/d/text/.style={font=\ttfamily\scriptsize}
+]
+  clock      & h5{c}; [dotted] 4{c}; 6{c} \\
+  mem\_init  & 2L H; [dotted] 2L; 3L \\
+  read\_op   & 2D{LNONE} 1D ; [dotted] 2D; 1D{LB/LH/LW/LBU/LHU} 2D{LNONE} \\
+  address    & 2U 1D ; [dotted] 2D ; 1D{VALID ADDR} 2U \\
+  mem\_ready & 3L; [dotted] 2L; H 2L \\
+  data       & 3U; [dotted] 2U; D 2U \\
+  \extracode
+  \begin{pgfonlayer}{background}
+    \begin{scope}[semitransparent]
+      \vertlines[gray,dotted]{0.0,1.0,...,8.0}
+    \end{scope}
+  \end{pgfonlayer}
+\end{tikztimingtable}
+\end{document}
