@@ -15,14 +15,14 @@ all: $(bins)
 dummy.hex:
 	icebram -s 0 -g 32 3584 > dummy.hex # 14 KiB
 
-fpga_dummy_fw.json: $(srcs) dummy.hex
+fpga.json: $(srcs) dummy.hex
 	yosys -DFW=\"dummy.hex\" -p 'synth_ice40 -top fpga -json $@' $(srcs)
 
-fpga_dummy_fw.asc: fpga_dummy_fw.json pins.pcf
+fpga.asc: fpga.json pins.pcf
 	nextpnr-ice40 --lp8k --package cm81 --freq 16 --json $< --pcf pins.pcf --asc $@
 
-$(ascs): fpga_%.asc: ../firmware/%/fw.hex fpga_dummy_fw.asc dummy.hex
-	icebram dummy.hex $< < fpga_dummy_fw.asc > $@
+$(ascs): fpga_%.asc: ../firmware/%/fw.hex fpga.asc dummy.hex
+	icebram dummy.hex $< < fpga.asc > $@
 
 $(bins): fpga_%.bin: fpga_%.asc
 	icepack $< $@
