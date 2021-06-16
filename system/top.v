@@ -27,13 +27,37 @@ module top (input clk,
                    .addr(addr), .wdata(wdata), .rdata(rdata),
                    .re(re), .we(we), .mem_ready(1'b1));
 
-   localparam NUM_WORDS = 14 * 1024 / 4;
-
+   // The first 64 KBytes of the address space are reserved for RAM.
+   // Not all of this is used. (Note that `addr` doesn't include the
+   // two least significant bits since `cpu_simple` assumes only word
+   // addressable memory.)
    assign ram_en = ~addr[14];
+
+   localparam NUM_WORDS = 14 * 1024 / 4;
 
    ram #(.NUM_WORDS(NUM_WORDS)) ram (.clk(clk), .addr(addr),
                                      .din(wdata), .dout(ram_rdata),
                                      .re(ram_en & re), .we(ram_en ? we : 4'b0));
+
+   /*
+
+    Register Memory Map
+    ===================
+    _____________________________________
+            |              |
+    address | read         | write
+    ________|______________|_____________
+            |              |
+    0x10000 | uart tx_full | uart tx
+    0x10004 | uart rx      |
+    0x10008 | ms_counter   | on-board led
+    0x1000C | gpio in0     | gpio out0
+    0x10010 |              | gpio out1
+    0x10014 |              | gpio out2
+    0x10018 |              | gpio out3
+    ________|______________|_____________
+
+    */
 
    wire rd_uart;
    wire wr_uart;
