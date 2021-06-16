@@ -14,7 +14,6 @@ module cpu(input clk,
    wire pc_load;
    wire [31:0] pc;
    wire [31:0] inst;
-   wire [31:0] inst_reg_out;
    wire [31:0] wd;
    wire [6:0] opcode;
    wire [4:0] ra;
