@@ -1,21 +1,30 @@
 volatile int *output_reg = (int*)0x10008;
+volatile unsigned int *ms_count_reg = (unsigned int*)0x10008;
 
-/* This isn't a great way to implement this, since we only get the
-   hoped for behaviour when the compiler doesn't optimize away the
-   loops. Better read the hardware timer? */
+unsigned int time(void)
+{
+  return *ms_count_reg;
+}
+
+void sleep(unsigned int ms)
+{
+  unsigned int start;
+  start = time();
+  while (time() - start < ms);
+}
 
 int main(void)
 {
   int i;
   for(;;) {
     *output_reg = 1;
-    for(i=0; i<100000; i++);
+    sleep(100000);
     *output_reg = 0;
-    for(i=0; i<100000; i++);
+    sleep(100000);
     *output_reg = 1;
-    for(i=0; i<100000; i++);
+    sleep(100000);
     *output_reg = 0;
-    for(i=0; i<400000; i++);
+    sleep(400000);
   }
   return 0;
 }
