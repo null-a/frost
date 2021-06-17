@@ -15,7 +15,6 @@ void sleep(unsigned int ms)
 
 int main(void)
 {
-  int i;
   for(;;) {
     *output_reg = 1;
     sleep(100000);
