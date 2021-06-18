@@ -2,6 +2,7 @@
 
 module cpu(input clk,
            input reset,
+           input irq,
            input mem_ready, // signals that data is ready to be read
            output mem_init, // strobe, initiating a memory ready
            output [2:0] mem_read_op,
@@ -36,15 +37,32 @@ module cpu(input clk,
    wire alu_sel1;
    wire [1:0] alu_sel2;
    wire [4:0] alu_op;
-   wire reg_wd_sel;
+   wire [1:0] reg_wd_sel;
    wire inst_load;
    wire mem_addr_sel;
    wire alu_reg_load;
    wire [31:0] alu_reg_out;
-   wire next_pc_sel;
+   wire [1:0] next_pc_sel;
    wire [31:0] next_pc;
+   wire mie;
+   wire mie_set;
+   wire mie_reset;
+   wire mtip;
+   wire csr_we;
+   wire [11:0] csr;
+   wire [11:0] csr_addr;
+   wire [11:0] csr_addr_ctrl;
+   wire csr_addr_sel;
+   wire [31:0] csr_out;
 
    assign wdata = r2;
+
+   mux #(.WIDTH(12)) csr_addr_mux (.a(csr), .b(csr_addr_ctrl), .out(csr_addr), .sel(csr_addr_sel));
+
+   csr_file csr_file (.clk(clk), .irq(irq), .mie(mie), .mtip(mtip),
+                      .we(csr_we), .addr(csr_addr),
+                      .mie_set(mie_set), .mie_reset(mie_reset),
+                      .din(alu_reg_out), .dout(csr_out));
 
    control control(.clk(clk), .reset(reset), .opcode(opcode), .funct3(funct3), .bit20(bit20), .bit30(bit30),
                    .cmp_out(alu_out[0]),
@@ -56,13 +74,16 @@ module cpu(input clk,
                    .next_pc_sel(next_pc_sel),
                    .reg_wd_sel(reg_wd_sel),
                    .mem_addr_sel(mem_addr_sel), .mem_read_op(mem_read_op), .mem_write_op(mem_write_op),
-                   .inst_load(inst_load), .mem_ready(mem_ready), .mem_init(mem_init));
+                   .inst_load(inst_load), .mem_ready(mem_ready), .mem_init(mem_init),
+                   .csr_we(csr_we), .csr_addr(csr_addr_ctrl), .csr_addr_sel(csr_addr_sel),
+                   .mie_set(mie_set), .mie_reset(mie_reset),
+                   .mtip(mtip), .mie(mie));
 
-   mux next_pc_mux (.a(alu_out), .b(alu_reg_out), .sel(next_pc_sel), .out(next_pc));
+   mux4 next_pc_mux (.a(alu_out), .b(alu_reg_out), .c(csr_out), .d(32'b0), .sel(next_pc_sel), .out(next_pc));
 
    register program_counter(.clk(clk), .din(next_pc), .dout(pc), .en(pc_load));
 
-   mux reg_wd_mux (.a(alu_reg_out), .b(rdata), .sel(reg_wd_sel), .out(wd));
+   mux4 reg_wd_mux (.a(alu_reg_out), .b(rdata), .c(csr_out), .d(32'b0), .sel(reg_wd_sel), .out(wd));
 
    mux #(.WIDTH(5)) reg_rs_mux (.a(rs1), .b(rs2), .out(ra), .sel(reg_rs_sel));
 
@@ -77,9 +98,16 @@ module cpu(input clk,
    decode decode (.inst(inst), .opcode(opcode),
                   .rd(rd), .rs1(rs1), .rs2(rs2),
                   .funct3(funct3), .funct7(funct7),
-                  .imm(imm), .bit20(bit20), .bit30(bit30));
+                  .imm(imm), .bit20(bit20), .bit30(bit30), .csr(csr));
 
    mux alu_in1_mux (.a(r1), .b(pc), .sel(alu_sel1), .out(alu_in1));
+
+   // TODO: I'm making use of the fact that I already have a
+   // hard-coded zero as alu input 2 to have the ALU act as a pass
+   // though. Think about whether this is a good idea. Alternatives
+   // include making it possible to load x0 at arbitrary points during
+   // execution, and using that instead of this hardcoded input. Or
+   // adding an explicit pass through op to the ALU.
    mux4 alu_in2_mux (.a(r2), .b(imm), .c(32'd4), .d(32'b0), .sel(alu_sel2), .out(alu_in2));
 
    alu alu (.a(alu_in1), .b(alu_in2), .op(alu_op), .dout(alu_out));

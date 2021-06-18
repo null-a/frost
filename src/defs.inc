@@ -21,3 +21,8 @@ localparam SB    = 2'b00;
 localparam SH    = 2'b01;
 localparam SW    = 2'b10;
 localparam SNONE = 2'b11;
+
+localparam MSTATUS = 12'h300;
+localparam MTVEC   = 12'h305;
+localparam MIP     = 12'h344;
+localparam MEPC    = 12'h341;

@@ -23,7 +23,7 @@ module isa_tb;
    wire re;
    wire [3:0] we;
 
-   cpu_simple cpu (.clk(clk), .reset(1'b0),
+   cpu_simple cpu (.clk(clk), .reset(1'b0), .irq(1'b0),
                    .addr(addr), .wdata(wdata), .rdata(rdata),
                    .re(re), .we(we), .mem_ready(1'b1));
 

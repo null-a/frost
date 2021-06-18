@@ -8,6 +8,7 @@
 
 module cpu_simple(input clk,
                   input reset,
+                  input irq,
                   input mem_ready,
                   input [31:0] rdata,
                   output [31:0] wdata,
@@ -21,7 +22,7 @@ module cpu_simple(input clk,
    wire [31:0] wdata_internal;
    wire [31:0] addr_internal;
 
-   cpu cpu (.clk(clk), .reset(reset),
+   cpu cpu (.clk(clk), .reset(reset), .irq(irq),
             .mem_ready(mem_ready), .mem_init(re),
             .mem_read_op(mem_read_op), .mem_write_op(mem_write_op),
             .rdata(rdata_internal), .wdata(wdata_internal),

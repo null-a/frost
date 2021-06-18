@@ -9,7 +9,8 @@ module decode(input [31:0] inst,
               output [6:0] funct7,
               output reg [31:0] imm,
               output bit20,
-              output bit30);
+              output bit30,
+              output [11:0] csr);
 
    `include "defs.inc"
 
@@ -22,6 +23,7 @@ module decode(input [31:0] inst,
 
    assign bit20 = inst[20];
    assign bit30 = inst[30];
+   assign csr = inst[31:20];
 
    wire signbit;
    assign signbit = inst[31];

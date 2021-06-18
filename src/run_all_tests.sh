@@ -11,6 +11,7 @@ set -e
 ./run_test.sh blt
 ./run_test.sh bltu
 ./run_test.sh bne
+./run_test.sh csr
 ./run_test.sh fence_i
 ./run_test.sh jal
 ./run_test.sh jal2

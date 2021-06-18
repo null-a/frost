@@ -8,6 +8,8 @@ module control(input clk,
                input bit30,
                input cmp_out,
                input mem_ready,
+               input mie,
+               input mtip,
                output reg halt,
                output reg pc_load,
                output reg reg_re,
@@ -16,14 +18,19 @@ module control(input clk,
                output reg alu_sel1,
                output reg [1:0] alu_sel2,
                output reg [4:0] alu_op,
-               output reg reg_wd_sel,
+               output reg [1:0] reg_wd_sel,
                output reg mem_addr_sel,
                output reg [2:0] mem_read_op,
                output reg [1:0] mem_write_op,
                output reg inst_load,
                output reg alu_reg_load,
-               output reg next_pc_sel,
-               output reg mem_init);
+               output reg [1:0] next_pc_sel,
+               output reg mem_init,
+               output reg csr_we,
+               output reg [11:0] csr_addr,
+               output reg csr_addr_sel,
+               output reg mie_set,
+               output reg mie_reset);
 
    `include "defs.inc"
 
@@ -40,6 +47,9 @@ module control(input clk,
    localparam MEM_WRITE      = 4'd10;
    localparam MEM_READ       = 4'd11;
    localparam MEM_TO_RF      = 4'd12;
+   localparam INT            = 4'd13;
+   localparam CSRRW3         = 4'd14;
+   localparam CSRRW4         = 4'd15;
 
    reg [3:0] state = STATE0, next_state;
 
@@ -51,42 +61,52 @@ module control(input clk,
    end
 
    localparam ANY1 = 1'b?;
+   localparam ANY3 = 3'b?;
    localparam ANY7 = 7'b?;
+
+   wire take_interrupt;
+   assign take_interrupt = mtip & mie;
 
    // Fields decoded from the instruction (opcode, funct3, imm, etc.)
    // are available from STATE2 and later.
    always @(*) begin
-      casez ({state, opcode, mem_ready})
-        {STATE0,         ANY7,     ANY1}: next_state = STATE1;
-        {STATE1,         ANY7,     1'b0}: next_state = STATE1;
-        {STATE1,         ANY7,     1'b1}: next_state = STATE2;
-        {STATE2,         OP_IMM,   ANY1}: next_state = ALU_OP_IMM;
-        {STATE2,         OP,       ANY1}: next_state = FETCH_REG;
-        {STATE2,         LUI,      ANY1}: next_state = ALU_R1_ADD_IMM;
-        {STATE2,         AUIPC,    ANY1}: next_state = ALU_TO_RF;
-        {STATE2,         BRANCH,   ANY1}: next_state = FETCH_REG;
-        {STATE2,         JAL,      ANY1}: next_state = STATE0;
-        {STATE2,         JALR,     ANY1}: next_state = JALR_ALU;
-        {STATE2,         LOAD,     ANY1}: next_state = ALU_R1_ADD_IMM;
-        {STATE2,         STORE,    ANY1}: next_state = FETCH_REG;
-        {STATE2,         MISC_MEM, ANY1}: next_state = STATE0;
-        {STATE2,         SYSTEM,   ANY1}: next_state = state; // Assuming `ebreak`.
-        {FETCH_REG,      BRANCH,   ANY1}: next_state = COND_BRANCH;
-        {FETCH_REG,      OP,       ANY1}: next_state = ALU_OP;
-        {FETCH_REG,      STORE,    ANY1}: next_state = ALU_R1_ADD_IMM;
-        {ALU_OP_IMM,     ANY7,     ANY1}: next_state = ALU_TO_RF;
-        {ALU_OP,         ANY7,     ANY1}: next_state = ALU_TO_RF;
-        {ALU_R1_ADD_IMM, LUI,      ANY1}: next_state = ALU_TO_RF;
-        {ALU_R1_ADD_IMM, LOAD,     ANY1}: next_state = MEM_READ;
-        {ALU_R1_ADD_IMM, STORE,    ANY1}: next_state = MEM_WRITE;
-        {ALU_TO_RF,      ANY7,     ANY1}: next_state = STATE0;
-        {COND_BRANCH,    ANY7,     ANY1}: next_state = STATE0;
-        {JALR_ALU,       ANY7,     ANY1}: next_state = STATE0;
-        {MEM_READ,       ANY7,     ANY1}: next_state = MEM_TO_RF;
-        {MEM_WRITE,      ANY7,     ANY1}: next_state = STATE0;
-        {MEM_TO_RF,      ANY7,     1'b0}: next_state = MEM_TO_RF;
-        {MEM_TO_RF,      ANY7,     1'b1}: next_state = STATE0;
-        default:                          next_state = state;
+      casez ({state, opcode, mem_ready, funct3, bit20, take_interrupt})
+        {STATE0,         ANY7,     ANY1, ANY3, ANY1, 1'b1}: next_state = INT;
+        {STATE0,         ANY7,     ANY1, ANY3, ANY1, 1'b0}: next_state = STATE1;
+        {STATE1,         ANY7,     1'b0, ANY3, ANY1, ANY1}: next_state = STATE1;
+        {STATE1,         ANY7,     1'b1, ANY3, ANY1, ANY1}: next_state = STATE2;
+        {STATE2,         OP_IMM,   ANY1, ANY3, ANY1, ANY1}: next_state = ALU_OP_IMM;
+        {STATE2,         OP,       ANY1, ANY3, ANY1, ANY1}: next_state = FETCH_REG;
+        {STATE2,         LUI,      ANY1, ANY3, ANY1, ANY1}: next_state = ALU_R1_ADD_IMM;
+        {STATE2,         AUIPC,    ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
+        {STATE2,         BRANCH,   ANY1, ANY3, ANY1, ANY1}: next_state = FETCH_REG;
+        {STATE2,         JAL,      ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {STATE2,         JALR,     ANY1, ANY3, ANY1, ANY1}: next_state = JALR_ALU;
+        {STATE2,         LOAD,     ANY1, ANY3, ANY1, ANY1}: next_state = ALU_R1_ADD_IMM;
+        {STATE2,         STORE,    ANY1, ANY3, ANY1, ANY1}: next_state = FETCH_REG;
+        {STATE2,         MISC_MEM, ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {STATE2,         SYSTEM,   ANY1, 3'd0, 1'b1, ANY1}: next_state = state; // ebreak
+        {STATE2,         SYSTEM,   ANY1, 3'd0, 1'b0, ANY1}: next_state = STATE0; // mret
+        {STATE2,         SYSTEM,   ANY1, 3'd1, ANY1, ANY1}: next_state = CSRRW3; // csrrw
+        {FETCH_REG,      BRANCH,   ANY1, ANY3, ANY1, ANY1}: next_state = COND_BRANCH;
+        {FETCH_REG,      OP,       ANY1, ANY3, ANY1, ANY1}: next_state = ALU_OP;
+        {FETCH_REG,      STORE,    ANY1, ANY3, ANY1, ANY1}: next_state = ALU_R1_ADD_IMM;
+        {ALU_OP_IMM,     ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
+        {ALU_OP,         ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
+        {ALU_R1_ADD_IMM, LUI,      ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
+        {ALU_R1_ADD_IMM, LOAD,     ANY1, ANY3, ANY1, ANY1}: next_state = MEM_READ;
+        {ALU_R1_ADD_IMM, STORE,    ANY1, ANY3, ANY1, ANY1}: next_state = MEM_WRITE;
+        {ALU_TO_RF,      ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {COND_BRANCH,    ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {JALR_ALU,       ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {MEM_READ,       ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = MEM_TO_RF;
+        {MEM_WRITE,      ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {MEM_TO_RF,      ANY7,     1'b0, ANY3, ANY1, ANY1}: next_state = MEM_TO_RF;
+        {MEM_TO_RF,      ANY7,     1'b1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {INT,            ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {CSRRW3,         ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = CSRRW4;
+        {CSRRW4,         ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        default:                                      next_state = state;
       endcase
    end
 
@@ -121,8 +141,13 @@ module control(input clk,
       alu_reg_load = 0;
       next_pc_sel = 0;
       mem_init = 0;
+      mie_set = 0;
+      mie_reset = 0;
+      csr_we = 0;
+      csr_addr = 0;
+      csr_addr_sel = 0;
 
-      if (state == STATE0) begin
+      if (state == STATE0 & ~take_interrupt) begin
          // Read next instruction into output register of ram.
          mem_addr_sel = 0; // pc
          mem_read_op = LW;
@@ -132,6 +157,21 @@ module control(input clk,
          alu_sel2 = 2; // 4
          alu_op = 0; // +
          alu_reg_load = 1;
+      end
+      else if (state == STATE0 & take_interrupt) begin
+         // alu_reg <= pc + 0
+         alu_sel1 = 1; // pc
+         alu_sel2 = 3; // 0
+         alu_op = 0; // +
+         alu_reg_load = 1;
+         // pc <= mvec
+         csr_addr = MTVEC;
+         csr_addr_sel = 1;
+         next_pc_sel = 2; // csr_out
+         pc_load = 1;
+         // disable interrupts
+         // mie <= 0
+         mie_reset = 1;
       end
       else if (state == STATE1) begin
          // Continue to drive address bus / read_op while
@@ -234,9 +274,28 @@ module control(input clk,
          next_pc_sel = 1;
          pc_load = 1;
       end
-      else if (state == STATE2 & opcode == SYSTEM) begin
-         // Assuming `ebreak`
+      else if (state == STATE2 & opcode == SYSTEM & funct3 == 3'd0 & bit20) begin
+         // ebreak
          halt = 1;
+      end
+      else if (state == STATE2 & opcode == SYSTEM & funct3 == 3'd0 & ~bit20) begin
+         // mret
+         // pc <= mecp
+         next_pc_sel = 2; // csr
+         pc_load = 1;
+         csr_addr = MEPC; // mepc
+         csr_addr_sel = 1;
+         // mie <= 1
+         mie_set = 1;
+      end
+      else if (state == STATE2 & opcode == SYSTEM & funct3 == 3'd1) begin
+         // csrrw
+         // Store incremented PC
+         next_pc_sel = 1;
+         pc_load = 1;
+         // r1 <= rs1
+         reg_re = 1;
+         reg_rs_sel = 0;
       end
       else if (state == FETCH_REG) begin
          // Load r1
@@ -301,6 +360,28 @@ module control(input clk,
          // (potentially) waiting for the memory read to happen.
          mem_addr_sel = 1; // alu_reg
          mem_read_op = funct3;
+      end
+      else if (state == INT) begin
+         // mepc <= alu_reg
+         csr_addr = MEPC;
+         csr_addr_sel = 1;
+         csr_we = 1;
+      end
+      else if (state == CSRRW3) begin
+         // alu_reg <= r1 + 0
+         alu_sel1 = 0; // r1
+         alu_sel2 = 3; // 0
+         alu_op = 0; // +
+         alu_reg_load = 1;
+         // rd <= csr
+         csr_addr_sel = 0;
+         reg_we = 1;
+         reg_wd_sel = 2; // csr_out
+      end
+      else if (state == CSRRW4) begin
+         // csr <= alu_reg
+         csr_we = 1;
+         csr_addr_sel = 0;
       end
    end // always @ (*)
 

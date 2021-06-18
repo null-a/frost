@@ -23,7 +23,7 @@ module top (input clk,
 
    wire ram_en;
 
-   cpu_simple cpu (.clk(clk), .reset(reset),
+   cpu_simple cpu (.clk(clk), .reset(reset), .irq(irq),
                    .addr(addr), .wdata(wdata), .rdata(rdata),
                    .re(re), .we(we), .mem_ready(1'b1));
 
@@ -38,6 +38,12 @@ module top (input clk,
    ram #(.NUM_WORDS(NUM_WORDS)) ram (.clk(clk), .addr(addr),
                                      .din(wdata), .dout(ram_rdata),
                                      .re(ram_en & re), .we(ram_en ? we : 4'b0));
+
+   wire irq;
+   wire [31:0] mtimer_out;
+   wire mtimer_we;
+   assign mtimer_we = ~ram_en & (addr[3:0] == 4'b1010 || addr[3:0] == 4'b1011);
+   mtimer mtimer (.clk(clk), .din(wdata), .we(mtimer_we), .addr(addr[1:0]), .irq(irq), .dout(mtimer_out));
 
    /*
 
@@ -55,6 +61,11 @@ module top (input clk,
     0x10010 |              | gpio out1
     0x10014 |              | gpio out2
     0x10018 |              | gpio out3
+    0x1001C |              |
+    0x10020 | mtime (l)    |
+    0x10024 | mtime (h)    |
+    0x10028 | mtimecmp (l) | mtimecmp (l)
+    0x1002C | mtimecmp (h) | mtimecmp (h)
     ________|______________|_____________
 
     */
@@ -83,11 +94,12 @@ module top (input clk,
       in0_reg1 <= in0_reg0;
    end
 
-   assign rdata = ram_en             ? ram_rdata :
-                  addr[1:0] == 2'b00 ? {31'b0, tx_full} :
-                  addr[1:0] == 2'b01 ? {23'b0, rx_empty, uart_rdata} :
-                  addr[1:0] == 2'b10 ? ms_count :
-                  /* otherwise */      {31'b0, in0_reg1};
+   assign rdata = ram_en               ? ram_rdata :
+                  addr[3:0] == 4'b0000 ? {31'b0, tx_full} :
+                  addr[3:0] == 4'b0001 ? {23'b0, rx_empty, uart_rdata} :
+                  addr[3:0] == 4'b0010 ? ms_count :
+                  addr[3:0] == 4'b0011 ? {31'b0, in0_reg1} :
+                  /* otherwise */        mtimer_out;
 
    wire rx_empty;
    wire tx_full;
@@ -100,6 +112,7 @@ module top (input clk,
                             .rx_empty(rx_empty), .tx_full(tx_full),
                             .wr_uart(wr_uart), .rd_uart(rd_uart_prev));
 
+   // TODO: Drop this in favour of `mtimer`.
    wire [31:0] ms_count;
    ms_counter ms_counter (.clk(clk), .out(ms_count));
 

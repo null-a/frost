@@ -35,5 +35,9 @@ SECTIONS {
     * (.bss);
   }
 
+  .text.isr 0x2000 : {
+    * (.text.isr);
+  }
+
   /DISCARD/ : { * (*); }
 }
