@@ -1,9 +1,11 @@
 `default_nettype none
 
-module register(input clk,
-                input en,
-                input [31:0] din,
-                output reg [31:0] dout);
+module register
+  #(parameter WIDTH=32)
+   (input clk,
+    input en,
+    input [WIDTH-1:0] din,
+    output reg [WIDTH-1:0] dout);
 
    initial begin
       dout = 0;

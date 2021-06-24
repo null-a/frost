@@ -54,6 +54,8 @@ module cpu(input clk,
    wire [11:0] csr_addr_ctrl;
    wire csr_addr_sel;
    wire [31:0] csr_out;
+   wire cmp_reg_out;
+   wire cmp_reg_load;
 
    assign wdata = r2;
 
@@ -65,12 +67,12 @@ module cpu(input clk,
                       .din(alu_reg_out), .dout(csr_out));
 
    control control(.clk(clk), .reset(reset), .opcode(opcode), .funct3(funct3), .bit20(bit20), .bit30(bit30),
-                   .cmp_out(alu_out[0]),
+                   .cmp(cmp_reg_out),
                    .halt(halt),
                    .pc_load(pc_load),
                    .reg_re(reg_re), .reg_we(reg_we), .reg_rs_sel(reg_rs_sel),
                    .alu_sel1(alu_sel1), .alu_sel2(alu_sel2), .alu_op(alu_op),
-                   .alu_reg_load(alu_reg_load),
+                   .alu_reg_load(alu_reg_load), .cmp_reg_load(cmp_reg_load),
                    .next_pc_sel(next_pc_sel),
                    .reg_wd_sel(reg_wd_sel),
                    .mem_addr_sel(mem_addr_sel), .mem_read_op(mem_read_op), .mem_write_op(mem_write_op),
@@ -113,5 +115,6 @@ module cpu(input clk,
    alu alu (.a(alu_in1), .b(alu_in2), .op(alu_op), .dout(alu_out));
 
    register alu_reg (.clk(clk), .din(alu_out), .dout(alu_reg_out), .en(alu_reg_load));
+   register #(.WIDTH(1)) cmp_reg (.clk(clk), .din(alu_out[0]), .dout(cmp_reg_out), .en(cmp_reg_load));
 
 endmodule // cpu

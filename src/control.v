@@ -6,7 +6,7 @@ module control(input clk,
                input [2:0] funct3,
                input bit20,
                input bit30,
-               input cmp_out,
+               input cmp,
                input mem_ready,
                input mie,
                input mtip,
@@ -30,28 +30,30 @@ module control(input clk,
                output reg [11:0] csr_addr,
                output reg csr_addr_sel,
                output reg mie_set,
-               output reg mie_reset);
+               output reg mie_reset,
+               output reg cmp_reg_load);
 
    `include "defs.inc"
 
-   localparam STATE0         = 4'd0;
-   localparam STATE1         = 4'd1;
-   localparam STATE2         = 4'd2;
-   localparam FETCH_REG      = 4'd3;
-   localparam ALU_OP_IMM     = 4'd4;
-   localparam ALU_OP         = 4'd5;
-   localparam ALU_R1_ADD_IMM = 4'd6;
-   localparam ALU_TO_RF      = 4'd7;
-   localparam COND_BRANCH    = 4'd8;
-   localparam JALR_ALU       = 4'd9;
-   localparam MEM_WRITE      = 4'd10;
-   localparam MEM_READ       = 4'd11;
-   localparam MEM_TO_RF      = 4'd12;
-   localparam INT            = 4'd13;
-   localparam CSRRW3         = 4'd14;
-   localparam CSRRW4         = 4'd15;
+   localparam STATE0         = 5'd0;
+   localparam STATE1         = 5'd1;
+   localparam STATE2         = 5'd2;
+   localparam FETCH_REG      = 5'd3;
+   localparam ALU_OP_IMM     = 5'd4;
+   localparam ALU_OP         = 5'd5;
+   localparam ALU_R1_ADD_IMM = 5'd6;
+   localparam ALU_TO_RF      = 5'd7;
+   localparam COND_BRANCH4   = 5'd8;
+   localparam COND_BRANCH5   = 5'd16;
+   localparam JALR_ALU       = 5'd9;
+   localparam MEM_WRITE      = 5'd10;
+   localparam MEM_READ       = 5'd11;
+   localparam MEM_TO_RF      = 5'd12;
+   localparam INT            = 5'd13;
+   localparam CSRRW3         = 5'd14;
+   localparam CSRRW4         = 5'd15;
 
-   reg [3:0] state = STATE0, next_state;
+   reg [4:0] state = STATE0, next_state;
 
    always @(posedge clk) begin
       if (reset)
@@ -88,7 +90,7 @@ module control(input clk,
         {STATE2,         SYSTEM,   ANY1, 3'd0, 1'b1, ANY1}: next_state = state; // ebreak
         {STATE2,         SYSTEM,   ANY1, 3'd0, 1'b0, ANY1}: next_state = STATE0; // mret
         {STATE2,         SYSTEM,   ANY1, 3'd1, ANY1, ANY1}: next_state = CSRRW3; // csrrw
-        {FETCH_REG,      BRANCH,   ANY1, ANY3, ANY1, ANY1}: next_state = COND_BRANCH;
+        {FETCH_REG,      BRANCH,   ANY1, ANY3, ANY1, ANY1}: next_state = COND_BRANCH4;
         {FETCH_REG,      OP,       ANY1, ANY3, ANY1, ANY1}: next_state = ALU_OP;
         {FETCH_REG,      STORE,    ANY1, ANY3, ANY1, ANY1}: next_state = ALU_R1_ADD_IMM;
         {ALU_OP_IMM,     ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
@@ -97,7 +99,8 @@ module control(input clk,
         {ALU_R1_ADD_IMM, LOAD,     ANY1, ANY3, ANY1, ANY1}: next_state = MEM_READ;
         {ALU_R1_ADD_IMM, STORE,    ANY1, ANY3, ANY1, ANY1}: next_state = MEM_WRITE;
         {ALU_TO_RF,      ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
-        {COND_BRANCH,    ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {COND_BRANCH4,   ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = COND_BRANCH5;
+        {COND_BRANCH5,   ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
         {JALR_ALU,       ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
         {MEM_READ,       ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = MEM_TO_RF;
         {MEM_WRITE,      ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
@@ -146,6 +149,7 @@ module control(input clk,
       csr_we = 0;
       csr_addr = 0;
       csr_addr_sel = 0;
+      cmp_reg_load = 0;
 
       if (state == STATE0 & ~take_interrupt) begin
          // Read next instruction into output register of ram.
@@ -328,13 +332,17 @@ module control(input clk,
          reg_we = 1;
          reg_wd_sel = 0; // alu_reg
       end
-      else if (state == COND_BRANCH) begin
-         // Conditionally update PC
-         pc_load = cmp_out;
-         next_pc_sel = 1; // alu_reg
+      else if (state == COND_BRANCH4) begin
+         // Perform comparison, storing result in cmp_reg
          alu_sel1 = 0; // rs1
          alu_sel2 = 0; // rs2
          alu_op = {1'b1, 1'b0,  funct3};
+         cmp_reg_load = 1;
+      end
+      else if (state == COND_BRANCH5) begin
+         // Conditionally update PC
+         pc_load = cmp;
+         next_pc_sel = 1; // alu_reg
       end
       else if (state == JALR_ALU) begin
          // pc <= r1 + imm
