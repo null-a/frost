@@ -42,7 +42,7 @@ module cpu(input clk,
    wire mem_addr_sel;
    wire alu_reg_load;
    wire [31:0] alu_reg_out;
-   wire [1:0] next_pc_sel;
+   wire next_pc_sel;
    wire [31:0] next_pc;
    wire mie;
    wire mie_set;
@@ -81,7 +81,7 @@ module cpu(input clk,
                    .mie_set(mie_set), .mie_reset(mie_reset),
                    .mtip(mtip), .mie(mie));
 
-   mux4 next_pc_mux (.a(alu_out), .b(alu_reg_out), .c(csr_out), .d(32'b0), .sel(next_pc_sel), .out(next_pc));
+   mux next_pc_mux (.a(alu_reg_out), .b(csr_out), .sel(next_pc_sel), .out(next_pc));
 
    register program_counter(.clk(clk), .din(next_pc), .dout(pc), .en(pc_load));
 

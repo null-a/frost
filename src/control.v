@@ -24,7 +24,7 @@ module control(input clk,
                output reg [1:0] mem_write_op,
                output reg inst_load,
                output reg alu_reg_load,
-               output reg [1:0] next_pc_sel,
+               output reg next_pc_sel,
                output reg mem_init,
                output reg csr_we,
                output reg [11:0] csr_addr,
@@ -45,13 +45,15 @@ module control(input clk,
    localparam ALU_TO_RF      = 5'd7;
    localparam COND_BRANCH4   = 5'd8;
    localparam COND_BRANCH5   = 5'd16;
-   localparam JALR_ALU       = 5'd9;
+   localparam JALR3          = 5'd9;
+   localparam JALR4          = 5'd18;
    localparam MEM_WRITE      = 5'd10;
    localparam MEM_READ       = 5'd11;
    localparam MEM_TO_RF      = 5'd12;
    localparam INT            = 5'd13;
    localparam CSRRW3         = 5'd14;
    localparam CSRRW4         = 5'd15;
+   localparam JAL3           = 5'd17;
 
    reg [4:0] state = STATE0, next_state;
 
@@ -82,8 +84,8 @@ module control(input clk,
         {STATE2,         LUI,      ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
         {STATE2,         AUIPC,    ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
         {STATE2,         BRANCH,   ANY1, ANY3, ANY1, ANY1}: next_state = FETCH_REG;
-        {STATE2,         JAL,      ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
-        {STATE2,         JALR,     ANY1, ANY3, ANY1, ANY1}: next_state = JALR_ALU;
+        {STATE2,         JAL,      ANY1, ANY3, ANY1, ANY1}: next_state = JAL3;
+        {STATE2,         JALR,     ANY1, ANY3, ANY1, ANY1}: next_state = JALR3;
         {STATE2,         LOAD,     ANY1, ANY3, ANY1, ANY1}: next_state = ALU_R1_ADD_IMM;
         {STATE2,         STORE,    ANY1, ANY3, ANY1, ANY1}: next_state = FETCH_REG;
         {STATE2,         MISC_MEM, ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
@@ -100,7 +102,8 @@ module control(input clk,
         {ALU_TO_RF,      ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
         {COND_BRANCH4,   ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = COND_BRANCH5;
         {COND_BRANCH5,   ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
-        {JALR_ALU,       ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {JALR3,          ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = JALR4;
+        {JALR4,          ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
         {MEM_READ,       ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = MEM_TO_RF;
         {MEM_WRITE,      ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
         {MEM_TO_RF,      ANY7,     1'b0, ANY3, ANY1, ANY1}: next_state = MEM_TO_RF;
@@ -108,6 +111,7 @@ module control(input clk,
         {INT,            ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
         {CSRRW3,         ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = CSRRW4;
         {CSRRW4,         ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {JAL3,           ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
         default:                                      next_state = state;
       endcase
    end
@@ -169,7 +173,7 @@ module control(input clk,
          // pc <= mvec
          csr_addr = MTVEC;
          csr_addr_sel = 1;
-         next_pc_sel = 2; // csr_out
+         next_pc_sel = 1; // csr_out
          pc_load = 1;
          // disable interrupts
          // mie <= 0
@@ -189,7 +193,7 @@ module control(input clk,
          reg_re = 1;
          reg_rs_sel = 0; // rs1
          // Store incremented PC
-         next_pc_sel = 1;
+         next_pc_sel = 0;
          pc_load = 1;
       end
       else if (state == STATE2 & opcode == OP) begin
@@ -197,7 +201,7 @@ module control(input clk,
          reg_re = 1;
          reg_rs_sel = 1; // rs2
          // Store incremented PC
-         next_pc_sel = 1;
+         next_pc_sel = 0;
          pc_load = 1;
       end
       else if (state == STATE2 & opcode == LUI) begin
@@ -206,12 +210,12 @@ module control(input clk,
          alu_sel2 = 1; // imm
          alu_reg_load = 1;
          // Store incremented PC
-         next_pc_sel = 1;
+         next_pc_sel = 0;
          pc_load = 1;
       end
       else if (state == STATE2 & opcode == AUIPC) begin
          // Store incremented PC
-         next_pc_sel = 1;
+         next_pc_sel = 0;
          pc_load = 1;
          // alu_reg <= pc+imm
          // It's important we do this now, as we also increment the PC
@@ -223,7 +227,7 @@ module control(input clk,
       end
       else if (state == STATE2 & opcode == BRANCH) begin
          // Store incremented PC
-         next_pc_sel = 1;
+         next_pc_sel = 0;
          pc_load = 1;
          // Load r2
          reg_re = 1;
@@ -241,12 +245,11 @@ module control(input clk,
          // regfile[rd] <= alu_reg (where alu_reg = pc+4)
          reg_we = 1;
          reg_wd_sel = 0;
-         // pc <= pc + imm
+         // alu_reg <= pc + imm
          alu_sel1 = 1; // pc
          alu_sel2 = 1; // imm
          alu_op = 0; // +
-         pc_load = 1;
-         next_pc_sel = 0; // alu_out
+         alu_reg_load = 1;
       end
       else if (state == STATE2 & opcode == JALR) begin
          // regfile[rd] <= alu_reg (where alu_reg = pc+4)
@@ -258,7 +261,7 @@ module control(input clk,
       end
       else if (state == STATE2 & opcode == LOAD) begin
          // Store incremented PC
-         next_pc_sel = 1;
+         next_pc_sel = 0;
          pc_load = 1;
          // Load r1
          reg_re = 1;
@@ -266,7 +269,7 @@ module control(input clk,
       end
       else if (state == STATE2 & opcode == STORE) begin
          // Store incremented PC
-         next_pc_sel = 1;
+         next_pc_sel = 0;
          pc_load = 1;
          // Load r2
          reg_re = 1;
@@ -274,7 +277,7 @@ module control(input clk,
       end
       else if (state == STATE2 & opcode == MISC_MEM) begin
          // Store incremented PC
-         next_pc_sel = 1;
+         next_pc_sel = 0;
          pc_load = 1;
       end
       else if (state == STATE2 & opcode == SYSTEM & funct3 == 3'd0 & bit20) begin
@@ -284,7 +287,7 @@ module control(input clk,
       else if (state == STATE2 & opcode == SYSTEM & funct3 == 3'd0 & ~bit20) begin
          // mret
          // pc <= mecp
-         next_pc_sel = 2; // csr
+         next_pc_sel = 1; // csr
          pc_load = 1;
          csr_addr = MEPC; // mepc
          csr_addr_sel = 1;
@@ -294,7 +297,7 @@ module control(input clk,
       else if (state == STATE2 & opcode == SYSTEM & funct3 == 3'd1) begin
          // csrrw
          // Store incremented PC
-         next_pc_sel = 1;
+         next_pc_sel = 0;
          pc_load = 1;
          // r1 <= rs1
          reg_re = 1;
@@ -341,15 +344,19 @@ module control(input clk,
       else if (state == COND_BRANCH5) begin
          // Conditionally update PC
          pc_load = cmp;
-         next_pc_sel = 1; // alu_reg
+         next_pc_sel = 0; // alu_reg
       end
-      else if (state == JALR_ALU) begin
-         // pc <= r1 + imm
-         pc_load = 1;
-         next_pc_sel = 0;
+      else if (state == JALR3) begin
+         // alu_reg <= r1 + imm
          alu_sel1 = 0; // r1
          alu_sel2 = 1; // imm
          alu_op = 0; // +
+         alu_reg_load = 1;
+      end
+      else if (state == JALR4) begin
+         // pc <= alu_reg
+         pc_load = 1;
+         next_pc_sel = 0;
       end
       else if (state == MEM_READ) begin
          mem_read_op = funct3;
@@ -388,6 +395,11 @@ module control(input clk,
          // csr <= alu_reg
          csr_we = 1;
          csr_addr_sel = 0;
+      end
+      else if (state == JAL3) begin
+         // pc <= alu_reg
+         pc_load = 1;
+         next_pc_sel = 0;
       end
    end // always @ (*)
 
