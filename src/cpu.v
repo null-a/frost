@@ -104,12 +104,6 @@ module cpu(input clk,
 
    mux alu_in1_mux (.a(r1), .b(pc), .sel(alu_sel1), .out(alu_in1));
 
-   // TODO: I'm making use of the fact that I already have a
-   // hard-coded zero as alu input 2 to have the ALU act as a pass
-   // though. Think about whether this is a good idea. Alternatives
-   // include making it possible to load x0 at arbitrary points during
-   // execution, and using that instead of this hardcoded input. Or
-   // adding an explicit pass through op to the ALU.
    mux4 alu_in2_mux (.a(r2), .b(imm), .c(32'd4), .d(32'b0), .sel(alu_sel2), .out(alu_in2));
 
    alu alu (.a(alu_in1), .b(alu_in2), .op(alu_op), .dout(alu_out));

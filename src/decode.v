@@ -17,7 +17,7 @@ module decode(input [31:0] inst,
    assign opcode = inst[6:0];
    assign rd = inst[11:7];
    assign funct3 = inst[14:12];
-   assign rs1 = opcode == LUI ? 5'b0 : inst[19:15];
+   assign rs1 = inst[19:15];
    assign rs2 = inst[24:20];
    assign funct7 = inst[31:25];
 

@@ -29,6 +29,9 @@ module alu(input [31:0] a,
         {1'b1, 1'b?, 3'd5}: dout = {31'b0, $signed(a) >= $signed(b)};
         {1'b1, 1'b?, 3'd7}: dout = {31'b0, a >= b};
 
+        {1'b1, 1'b?, 3'd2}: dout = a;
+        {1'b1, 1'b?, 3'd3}: dout = b;
+
         default: begin
            $display("error: unknown alu op");
            dout = 32'b0;

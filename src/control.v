@@ -79,7 +79,7 @@ module control(input clk,
         {STATE1,         ANY7,     1'b1, ANY3, ANY1, ANY1}: next_state = STATE2;
         {STATE2,         OP_IMM,   ANY1, ANY3, ANY1, ANY1}: next_state = ALU_OP_IMM;
         {STATE2,         OP,       ANY1, ANY3, ANY1, ANY1}: next_state = FETCH_REG;
-        {STATE2,         LUI,      ANY1, ANY3, ANY1, ANY1}: next_state = ALU_R1_ADD_IMM;
+        {STATE2,         LUI,      ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
         {STATE2,         AUIPC,    ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
         {STATE2,         BRANCH,   ANY1, ANY3, ANY1, ANY1}: next_state = FETCH_REG;
         {STATE2,         JAL,      ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
@@ -95,7 +95,6 @@ module control(input clk,
         {FETCH_REG,      STORE,    ANY1, ANY3, ANY1, ANY1}: next_state = ALU_R1_ADD_IMM;
         {ALU_OP_IMM,     ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
         {ALU_OP,         ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
-        {ALU_R1_ADD_IMM, LUI,      ANY1, ANY3, ANY1, ANY1}: next_state = ALU_TO_RF;
         {ALU_R1_ADD_IMM, LOAD,     ANY1, ANY3, ANY1, ANY1}: next_state = MEM_READ;
         {ALU_R1_ADD_IMM, STORE,    ANY1, ANY3, ANY1, ANY1}: next_state = MEM_WRITE;
         {ALU_TO_RF,      ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
@@ -163,10 +162,9 @@ module control(input clk,
          alu_reg_load = 1;
       end
       else if (state == STATE0 & take_interrupt) begin
-         // alu_reg <= pc + 0
+         // alu_reg <= pc
          alu_sel1 = 1; // pc
-         alu_sel2 = 3; // 0
-         alu_op = 0; // +
+         alu_op = 5'b10010; // pass through input 1
          alu_reg_load = 1;
          // pc <= mvec
          csr_addr = MTVEC;
@@ -203,9 +201,10 @@ module control(input clk,
          pc_load = 1;
       end
       else if (state == STATE2 & opcode == LUI) begin
-         // Load r1 with x0
-         reg_re = 1;
-         reg_rs_sel = 0; // rs1
+         // alu_reg <= imm
+         alu_op = 5'b10011; // pass through input 2
+         alu_sel2 = 1; // imm
+         alu_reg_load = 1;
          // Store incremented PC
          next_pc_sel = 1;
          pc_load = 1;
@@ -376,10 +375,9 @@ module control(input clk,
          csr_we = 1;
       end
       else if (state == CSRRW3) begin
-         // alu_reg <= r1 + 0
+         // alu_reg <= r1
          alu_sel1 = 0; // r1
-         alu_sel2 = 3; // 0
-         alu_op = 0; // +
+         alu_op = 5'b10010; // pass through input 1
          alu_reg_load = 1;
          // rd <= csr
          csr_addr_sel = 0;
