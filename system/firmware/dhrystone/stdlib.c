@@ -3,7 +3,7 @@
 
 volatile int *uart_write_reg = (int*)0x10000;
 volatile int *uart_read_reg = (int*)0x10004;
-volatile unsigned int *ms_count_reg = (unsigned int*)0x10008;
+volatile unsigned int *mtime = (unsigned int*)0x10020;
 
 int getchar()
 {
@@ -96,7 +96,7 @@ char* malloc(int n)
 
 unsigned int time(void)
 {
-  return *ms_count_reg;
+  return *mtime;
 }
 
 void sleep(unsigned int ms)

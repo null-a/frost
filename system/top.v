@@ -56,7 +56,7 @@ module top (input clk,
             |              |
     0x10000 | uart tx_full | uart tx
     0x10004 | uart rx      |
-    0x10008 | ms_counter   | on-board led
+    0x10008 |              | on-board led
     0x1000C | gpio in0     | gpio out0
     0x10010 |              | gpio out1
     0x10014 |              | gpio out2
@@ -97,7 +97,6 @@ module top (input clk,
    assign rdata = ram_en               ? ram_rdata :
                   addr[3:0] == 4'b0000 ? {31'b0, tx_full} :
                   addr[3:0] == 4'b0001 ? {23'b0, rx_empty, uart_rdata} :
-                  addr[3:0] == 4'b0010 ? ms_count :
                   addr[3:0] == 4'b0011 ? {31'b0, in0_reg1} :
                   /* otherwise */        mtimer_out;
 
@@ -111,11 +110,6 @@ module top (input clk,
                             .w_data(wdata[7:0]), .r_data(uart_rdata),
                             .rx_empty(rx_empty), .tx_full(tx_full),
                             .wr_uart(wr_uart), .rd_uart(rd_uart_prev));
-
-   // TODO: Drop this in favour of `mtimer`.
-   wire [31:0] ms_count;
-   ms_counter ms_counter (.clk(clk), .out(ms_count));
-
 
    // GPIO. Mapped at 0x10008, 0x1000C, 0x10010, 0x10014, 0x10018.
    // See blinky firmware for example of use.
