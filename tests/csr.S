@@ -13,6 +13,14 @@ RVTEST_CODE_BEGIN
         csrrw x1, mepc, x1;
         bne x1, x2, fail;
 
+        ## Test case 2
+        li TESTNUM, 2;
+        li x1, 0;
+        li x2, 7;
+        csrrwi x0, mepc, 7;
+        csrrw x1, mepc, x1;
+        bne x1, x2, fail;
+
   TEST_PASSFAIL
 
 RVTEST_CODE_END

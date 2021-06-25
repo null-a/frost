@@ -52,7 +52,7 @@ module control(input clk,
    localparam MEM_TO_RF      = 5'd12;
    localparam INT            = 5'd13;
    localparam CSRRW3         = 5'd14;
-   localparam CSRRW4         = 5'd15;
+   localparam ALU_REG_TO_CSR = 5'd15;
    localparam JAL3           = 5'd17;
 
    reg [4:0] state = STATE0, next_state;
@@ -92,6 +92,7 @@ module control(input clk,
         {STATE2,         SYSTEM,   ANY1, 3'd0, 1'b1, ANY1}: next_state = state; // ebreak
         {STATE2,         SYSTEM,   ANY1, 3'd0, 1'b0, ANY1}: next_state = STATE0; // mret
         {STATE2,         SYSTEM,   ANY1, 3'd1, ANY1, ANY1}: next_state = CSRRW3; // csrrw
+        {STATE2,         SYSTEM,   ANY1, 3'd5, ANY1, ANY1}: next_state = ALU_REG_TO_CSR; // csrrwi
         {FETCH_REG,      BRANCH,   ANY1, ANY3, ANY1, ANY1}: next_state = COND_BRANCH4;
         {FETCH_REG,      OP,       ANY1, ANY3, ANY1, ANY1}: next_state = ALU_OP;
         {FETCH_REG,      STORE,    ANY1, ANY3, ANY1, ANY1}: next_state = ALU_R1_ADD_IMM;
@@ -109,8 +110,8 @@ module control(input clk,
         {MEM_TO_RF,      ANY7,     1'b0, ANY3, ANY1, ANY1}: next_state = MEM_TO_RF;
         {MEM_TO_RF,      ANY7,     1'b1, ANY3, ANY1, ANY1}: next_state = STATE0;
         {INT,            ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
-        {CSRRW3,         ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = CSRRW4;
-        {CSRRW4,         ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
+        {CSRRW3,         ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = ALU_REG_TO_CSR;
+        {ALU_REG_TO_CSR, ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
         {JAL3,           ANY7,     ANY1, ANY3, ANY1, ANY1}: next_state = STATE0;
         default:                                      next_state = state;
       endcase
@@ -303,6 +304,20 @@ module control(input clk,
          reg_re = 1;
          reg_rs_sel = 0;
       end
+      else if (state == STATE2 & opcode == SYSTEM & funct3 == 3'd5) begin
+         // csrrwi
+         // Store incremented PC
+         next_pc_sel = 0;
+         pc_load = 1;
+         // alu_reg <= imm
+         alu_sel2 = 1; // imm
+         alu_op = 5'b10011; // pass through input 2
+         alu_reg_load = 1;
+         // rd <= csr
+         csr_addr_sel = 0;
+         reg_we = 1;
+         reg_wd_sel = 2;
+      end
       else if (state == FETCH_REG) begin
          // Load r1
          reg_re = 1;
@@ -391,7 +406,7 @@ module control(input clk,
          reg_we = 1;
          reg_wd_sel = 2; // csr_out
       end
-      else if (state == CSRRW4) begin
+      else if (state == ALU_REG_TO_CSR) begin
          // csr <= alu_reg
          csr_we = 1;
          csr_addr_sel = 0;

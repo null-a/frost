@@ -1,14 +1,14 @@
 #include <stdbool.h>
 
-// The original definition of `swap_csr` has K on the input constraint
-// to allow setting the CSR with a 5-bit immediate. I don't yet
-// support CSRRWI so I don't include that here.
+// The K on the input constraint indicates that the value can come
+// from a 5-bit immediate. Such use of a literal ultimately generates
+// a `csrrwi` instruction, somehow.
 
 // https://github.com/riscv/riscv-test-env/blob/43d3d53809085e2c8f030d72eed1bdf798bfb31a/encoding.h#L211-L213
 // https://gcc.gnu.org/onlinedocs/gcc/Machine-Constraints.html
 
 #define swap_csr(reg, val) ({ unsigned long __tmp; \
-      asm volatile ("csrrw %0, " #reg ", %1" : "=r"(__tmp) : "r"(val)); \
+      asm volatile ("csrrw %0, " #reg ", %1" : "=r"(__tmp) : "rK"(val)); \
       __tmp; })
 
 #define MSTATUS_MIE 0x00000008

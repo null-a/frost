@@ -40,6 +40,8 @@ module decode(input [31:0] inst,
           imm = {inst[31:12], 12'b0};
         BRANCH:  // B
           imm = {{20{signbit}}, inst[7], inst[30:25], inst[11:8], 1'b0};
+        SYSTEM:
+          imm = {27'b0, inst[19:15]};
         default: // I
           imm = {{21{signbit}}, inst[30:20]};
 
