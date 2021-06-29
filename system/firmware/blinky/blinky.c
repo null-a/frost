@@ -1,44 +1,28 @@
-#include <stdbool.h>
-
-// The K on the input constraint indicates that the value can come
-// from a 5-bit immediate. Such use of a literal ultimately generates
-// a `csrrwi` instruction, somehow.
-
-// https://github.com/riscv/riscv-test-env/blob/43d3d53809085e2c8f030d72eed1bdf798bfb31a/encoding.h#L211-L213
-// https://gcc.gnu.org/onlinedocs/gcc/Machine-Constraints.html
-
-#define swap_csr(reg, val) ({ unsigned long __tmp; \
-      asm volatile ("csrrw %0, " #reg ", %1" : "=r"(__tmp) : "rK"(val)); \
-      __tmp; })
-
-#define MSTATUS_MIE 0x00000008
-
 int volatile * const output_reg = (int*)0x10008;
 unsigned long long volatile * const mtime = (unsigned long long*)0x10020;
-unsigned long long volatile * const mtimecmp = (unsigned long long*)0x10028;
 
-void
-__attribute__ ((interrupt))
-__attribute__ ((section (".text.isr")))
-handler(void)
+unsigned int time(void)
 {
-  static bool state = false;
-  *output_reg = state;
-  state = !state;
-  *mtimecmp = *mtime + 250000; // Will trigger interrupt in 0.25secs time.
+  return *(unsigned int*)mtime;
 }
 
-void enable_interrupts(void)
+void sleep(unsigned int ms)
 {
-  swap_csr(mstatus, MSTATUS_MIE);
+  unsigned int start;
+  start = time();
+  while (time() - start < ms);
 }
 
 int main(void)
 {
-  // Once interrupts are enabled, a timer interrupt will immediately
-  // become pending because of the way `mtimecmp` is initialised in
-  // hardware.
-  enable_interrupts();
-  for(;;);
-  return 0;
+  for(;;) {
+    *output_reg = 1;
+    sleep(100000);
+    *output_reg = 0;
+    sleep(100000);
+    *output_reg = 1;
+    sleep(100000);
+    *output_reg = 0;
+    sleep(400000);
+  }
 }
