@@ -27,6 +27,10 @@ my [homepage](https://paulhorsfall.co.uk/).
 * The memory interface is very basic. It's suitable for cases where
   everything happens in a single cycle (e.g. an FPGA's on-chip RAM)
   but not much else.
+* A small subset of machine mode is implemented. This is sufficient to
+  support timer driven interrupts.
+  The [`threads`](./system/firmware/threads) firmware makes use of
+  this.
 
 ## Project Structure
 
