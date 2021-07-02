@@ -31,7 +31,8 @@ module control(input clk,
                output reg csr_addr_sel,
                output reg mie_set,
                output reg mie_reset,
-               output reg cmp_reg_load);
+               output reg cmp_reg_load,
+               output reg next_pc_clr_lsb);
 
    `include "defs.inc"
 
@@ -154,6 +155,7 @@ module control(input clk,
       csr_addr = 0;
       csr_addr_sel = 0;
       cmp_reg_load = 0;
+      next_pc_clr_lsb = 0;
 
       if (state == STATE0 & ~take_interrupt) begin
          // Read next instruction into output register of ram.
@@ -372,6 +374,7 @@ module control(input clk,
          // pc <= alu_reg
          pc_load = 1;
          next_pc_sel = 0;
+         next_pc_clr_lsb = 1;
       end
       else if (state == MEM_READ) begin
          mem_read_op = funct3;
