@@ -14,7 +14,7 @@ module control(input clk,
                output reg pc_load,
                output reg reg_re,
                output reg reg_we,
-               output reg reg_rs_sel, // TODO: It would be better to call this `reg_ra_sel`?
+               output reg reg_ra_sel,
                output reg alu_sel1,
                output reg [1:0] alu_sel2,
                output reg [4:0] alu_op,
@@ -137,7 +137,7 @@ module control(input clk,
       pc_load = 0;
       reg_re = 0;
       reg_we = 0;
-      reg_rs_sel = 0;
+      reg_ra_sel = 0;
       alu_sel1 = 0;
       alu_sel2 = 0;
       alu_op = 0;
@@ -194,7 +194,7 @@ module control(input clk,
       else if (state == STATE2 & opcode == OP_IMM) begin
          // Load r1
          reg_re = 1;
-         reg_rs_sel = 0; // rs1
+         reg_ra_sel = 0; // rs1
          // Store incremented PC
          next_pc_sel = 0;
          pc_load = 1;
@@ -202,7 +202,7 @@ module control(input clk,
       else if (state == STATE2 & opcode == OP) begin
          // Load r2
          reg_re = 1;
-         reg_rs_sel = 1; // rs2
+         reg_ra_sel = 1; // rs2
          // Store incremented PC
          next_pc_sel = 0;
          pc_load = 1;
@@ -234,7 +234,7 @@ module control(input clk,
          pc_load = 1;
          // Load r2
          reg_re = 1;
-         reg_rs_sel = 1; // rs2
+         reg_ra_sel = 1; // rs2
          // Compute branch target.
          // alu_reg <= pc+imm
          // It's important we do this now, as we also increment the PC
@@ -260,7 +260,7 @@ module control(input clk,
          reg_wd_sel = 0;
          // Load r1
          reg_re = 1;
-         reg_rs_sel = 0; // rs1
+         reg_ra_sel = 0; // rs1
       end
       else if (state == STATE2 & opcode == LOAD) begin
          // Store incremented PC
@@ -268,7 +268,7 @@ module control(input clk,
          pc_load = 1;
          // Load r1
          reg_re = 1;
-         reg_rs_sel = 0; // rs1
+         reg_ra_sel = 0; // rs1
       end
       else if (state == STATE2 & opcode == STORE) begin
          // Store incremented PC
@@ -276,7 +276,7 @@ module control(input clk,
          pc_load = 1;
          // Load r2
          reg_re = 1;
-         reg_rs_sel = 1; // rs2
+         reg_ra_sel = 1; // rs2
       end
       else if (state == STATE2 & opcode == MISC_MEM) begin
          // Store incremented PC
@@ -304,7 +304,7 @@ module control(input clk,
          pc_load = 1;
          // r1 <= rs1
          reg_re = 1;
-         reg_rs_sel = 0;
+         reg_ra_sel = 0;
       end
       else if (state == STATE2 & opcode == SYSTEM & funct3 == 3'd5) begin
          // csrrwi
@@ -323,7 +323,7 @@ module control(input clk,
       else if (state == FETCH_REG) begin
          // Load r1
          reg_re = 1;
-         reg_rs_sel = 0; // rs1
+         reg_ra_sel = 0; // rs1
       end
       else if (state == ALU_OP_IMM) begin
          // alu_reg <= rs1 `op` imm

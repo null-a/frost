@@ -21,7 +21,7 @@ module cpu(input clk,
    wire [4:0] rd;
    wire [4:0] rs1;
    wire [4:0] rs2;
-   wire reg_rs_sel;
+   wire reg_ra_sel;
    wire [2:0] funct3;
    wire [6:0] funct7;
    wire [31:0] imm;
@@ -72,7 +72,7 @@ module cpu(input clk,
                    .cmp(cmp_reg_out),
                    .halt(halt),
                    .pc_load(pc_load),
-                   .reg_re(reg_re), .reg_we(reg_we), .reg_rs_sel(reg_rs_sel),
+                   .reg_re(reg_re), .reg_we(reg_we), .reg_ra_sel(reg_ra_sel),
                    .alu_sel1(alu_sel1), .alu_sel2(alu_sel2), .alu_op(alu_op),
                    .alu_reg_load(alu_reg_load), .cmp_reg_load(cmp_reg_load),
                    .next_pc_sel(next_pc_sel), .next_pc_clr_lsb(next_pc_clr_lsb),
@@ -90,7 +90,7 @@ module cpu(input clk,
 
    mux4 reg_wd_mux (.a(alu_reg_out), .b(rdata), .c(csr_out), .d(32'b0), .sel(reg_wd_sel), .out(wd));
 
-   mux #(.WIDTH(5)) reg_rs_mux (.a(rs1), .b(rs2), .out(ra), .sel(reg_rs_sel));
+   mux #(.WIDTH(5)) reg_rs_mux (.a(rs1), .b(rs2), .out(ra), .sel(reg_ra_sel));
 
    reg_file reg_file (.clk(clk), .ra(ra), .wa(rd),
                       .din(wd), .re(reg_re),
