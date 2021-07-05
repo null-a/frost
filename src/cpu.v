@@ -44,7 +44,7 @@ module cpu(input clk,
    wire [31:0] alu_reg_out;
    wire next_pc_sel;
    wire [31:0] next_pc;
-   wire [31:0] next_pc_maybe_lsb_cleared;
+   wire [31:0] alu_reg_out_maybe_lsb_cleared;
    wire mie;
    wire mie_set;
    wire mie_reset;
@@ -83,10 +83,10 @@ module cpu(input clk,
                    .mie_set(mie_set), .mie_reset(mie_reset),
                    .mtip(mtip), .mie(mie));
 
-   mux next_pc_mux (.a(alu_reg_out), .b(csr_out), .sel(next_pc_sel), .out(next_pc));
-   clear_lsb clear_pc_lsb (.din(next_pc), .dout(next_pc_maybe_lsb_cleared), .en(next_pc_clr_lsb));
+   clear_lsb clear_pc_lsb (.din(alu_reg_out), .dout(alu_reg_out_maybe_lsb_cleared), .en(next_pc_clr_lsb));
+   mux next_pc_mux (.a(alu_reg_out_maybe_lsb_cleared), .b(csr_out), .sel(next_pc_sel), .out(next_pc));
 
-   register program_counter(.clk(clk), .din(next_pc_maybe_lsb_cleared), .dout(pc), .en(pc_load));
+   register program_counter(.clk(clk), .din(next_pc), .dout(pc), .en(pc_load));
 
    mux4 reg_wd_mux (.a(alu_reg_out), .b(rdata), .c(csr_out), .d(32'b0), .sel(reg_wd_sel), .out(wd));
 
